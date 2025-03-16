@@ -2,13 +2,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
+// Sound URLs
+const AUDIO_URLS = {
+  bgm: "https://assets.mixkit.co/music/download/mixkit-game-level-music-689.mp3",
+  click: "https://assets.mixkit.co/sfx/download/mixkit-arcade-game-jump-coin-216.wav",
+  hover: "https://assets.mixkit.co/sfx/download/mixkit-quick-jump-arcade-game-239.wav",
+  collect: "https://assets.mixkit.co/sfx/download/mixkit-arcade-mechanical-bling-217.wav",
+  success: "https://assets.mixkit.co/sfx/download/mixkit-unlock-game-notification-253.wav",
+  error: "https://assets.mixkit.co/sfx/download/mixkit-falling-game-over-1942.wav"
+};
+
 const AudioController = () => {
   const [isMuted, setIsMuted] = useState(true);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   
   useEffect(() => {
-    bgmRef.current = new Audio("https://freesound.org/data/previews/588/588466_7666867-lq.mp3"); // Placeholder chiptune
+    bgmRef.current = new Audio(AUDIO_URLS.bgm);
     bgmRef.current.loop = true;
+    bgmRef.current.volume = 0.5;
     
     return () => {
       if (bgmRef.current) {
@@ -52,20 +63,12 @@ const AudioController = () => {
 
 // Export a function to play sounds that can be used throughout the app
 export const useArcadeSound = () => {
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   
   const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error') => {
     if (isMuted) return;
     
-    const soundUrls: Record<string, string> = {
-      click: "https://freesound.org/data/previews/528/528866_9282034-lq.mp3",
-      hover: "https://freesound.org/data/previews/528/528865_9282034-lq.mp3",
-      collect: "https://freesound.org/data/previews/403/403013_5121236-lq.mp3",
-      success: "https://freesound.org/data/previews/387/387232_7255534-lq.mp3",
-      error: "https://freesound.org/data/previews/334/334404_5237719-lq.mp3"
-    };
-    
-    const sound = new Audio(soundUrls[soundType]);
+    const sound = new Audio(AUDIO_URLS[soundType]);
     sound.volume = 0.3;
     sound.play().catch(e => console.error("Sound effect play failed:", e));
   };
