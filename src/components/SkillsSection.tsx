@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import SkillToken from './SkillToken';
-import { Code, Database, Globe, Server, Terminal, Zap, Layout, FileCode } from 'lucide-react';
+import { Code, Database, Globe, Server, Terminal, Zap, Layout, FileCode, Gamepad } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const SkillsSection: React.FC = () => {
   const [collectedSkills, setCollectedSkills] = useState<string[]>([]);
@@ -107,8 +109,8 @@ const SkillsSection: React.FC = () => {
       
       <div className="flex flex-wrap justify-between items-start gap-6 mb-6">
         <p className="text-gray-300 max-w-lg">
-          Explore my skill set by clicking on the tokens scattered across the interface. 
-          Each token represents a technology I've mastered in my journey as a full-stack developer.
+          Explore my skill set! Each token represents a technology I've mastered. 
+          Play the Snake Game to collect these skills and track your progress.
         </p>
         
         <div className="bg-arcade-dark p-3 rounded-lg border border-arcade-purple">
@@ -119,11 +121,11 @@ const SkillsSection: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {skills.filter(skill => collectedSkills.includes(skill.name)).map((skill) => (
+        {skills.map((skill) => (
           <Sheet key={skill.name}>
             <SheetTrigger asChild>
               <div 
-                className="bg-arcade-dark p-3 rounded-lg border border-arcade-purple cursor-pointer hover:border-arcade-green transition-colors flex items-center gap-2"
+                className={`bg-arcade-dark p-3 rounded-lg border ${collectedSkills.includes(skill.name) ? 'border-arcade-green' : 'border-arcade-purple'} cursor-pointer hover:border-arcade-green transition-colors flex items-center gap-2`}
                 onClick={() => handleSkillSelect(skill)}
               >
                 <div 
@@ -132,8 +134,13 @@ const SkillsSection: React.FC = () => {
                 >
                   {skill.icon}
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="text-white font-pixel text-sm">{skill.name}</h3>
+                  {collectedSkills.includes(skill.name) ? (
+                    <span className="text-arcade-green text-xs">Collected</span>
+                  ) : (
+                    <span className="text-gray-400 text-xs">Not collected</span>
+                  )}
                 </div>
               </div>
             </SheetTrigger>
@@ -156,16 +163,35 @@ const SkillsSection: React.FC = () => {
                 <p className="text-gray-300 mb-4">
                   {skill.description}
                 </p>
-                <div className="bg-arcade-dark p-3 rounded-lg border border-arcade-purple">
-                  <p className="text-arcade-orange font-pixel text-sm">Skill Collected!</p>
-                </div>
+                {collectedSkills.includes(skill.name) ? (
+                  <div className="bg-arcade-dark p-3 rounded-lg border border-arcade-green">
+                    <p className="text-arcade-green font-pixel text-sm">Skill Collected!</p>
+                  </div>
+                ) : (
+                  <div className="bg-arcade-dark p-3 rounded-lg border border-arcade-purple">
+                    <p className="text-arcade-orange font-pixel text-sm">Not collected yet</p>
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>
         ))}
       </div>
       
-      <div className="min-h-[200px] relative overflow-hidden bg-arcade-dark rounded-lg border-2 border-arcade-purple">
+      <div className="flex justify-center mb-6">
+        <Button
+          onClick={() => {}} 
+          asChild
+          className="bg-arcade-orange hover:bg-arcade-orange/80 text-white font-pixel flex items-center gap-2"
+        >
+          <Link to="?section=game">
+            <Gamepad size={18} />
+            PLAY SNAKE GAME TO COLLECT SKILLS
+          </Link>
+        </Button>
+      </div>
+      
+      <div className="min-h-[100px] md:min-h-[200px] relative overflow-hidden bg-arcade-dark rounded-lg border-2 border-arcade-purple mb-4">
         <div className="absolute inset-0">
           {skills.map((skill) => (
             <SkillToken
@@ -179,6 +205,13 @@ const SkillsSection: React.FC = () => {
             />
           ))}
         </div>
+      </div>
+      
+      <div className="flex justify-center text-center">
+        <p className="text-gray-300 max-w-lg text-sm">
+          Click on the tokens in the section above to mark them as collected manually, 
+          or play Snake Game to collect them automatically.
+        </p>
       </div>
       
       {collectedSkills.length === skills.length && (
