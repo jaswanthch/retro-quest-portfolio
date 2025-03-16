@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
@@ -11,7 +12,8 @@ type Position = {
 
 interface SkillFood {
   position: Position;
-  skill: {
+  isSkill: boolean;
+  skill?: {
     name: string;
     description: string;
   };
@@ -20,7 +22,8 @@ interface SkillFood {
 const GRID_SIZE = 20;
 const CELL_SIZE = 20;
 const INITIAL_SPEED = 150;
-const SPEED_INCREASE = 1.2;
+const SPEED_INCREASE = 1.1; // Changed from 1.2 to 1.1 as requested
+const ITEMS_BEFORE_SKILL = 3; // Number of normal items before a skill appears
 
 const skills = [
   { name: 'JavaScript', description: 'A programming language for the web.' },
@@ -40,10 +43,23 @@ const getRandomPosition = (): Position => ({
   y: Math.floor(Math.random() * GRID_SIZE),
 });
 
-const getRandomSkill = (): SkillFood => ({
-  position: getRandomPosition(),
-  skill: skills[Math.floor(Math.random() * skills.length)],
-});
+const getRandomSkill = (): SkillFood['skill'] => 
+  skills[Math.floor(Math.random() * skills.length)];
+
+const generateFood = (isSkill: boolean): SkillFood => {
+  if (isSkill) {
+    return {
+      position: getRandomPosition(),
+      isSkill: true,
+      skill: getRandomSkill()
+    };
+  } else {
+    return {
+      position: getRandomPosition(),
+      isSkill: false
+    };
+  }
+};
 
 const SnakeGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,7 +69,7 @@ const SnakeGame: React.FC = () => {
     { x: 8, y: 10 },
   ]);
   const [direction, setDirection] = useState<string>('right');
-  const [food, setFood] = useState<SkillFood>(getRandomSkill());
+  const [food, setFood] = useState<SkillFood>(generateFood(false));
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
@@ -61,6 +77,7 @@ const SnakeGame: React.FC = () => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [collectedSkill, setCollectedSkill] = useState<{name: string, description: string} | null>(null);
   const [showPopups, setShowPopups] = useState<boolean>(true);
+  const [itemsCollected, setItemsCollected] = useState<number>(0); // Track normal items collected
   const { playSound, setIsGameActive } = useArcadeSound();
   
   const gameLoopRef = useRef<number | null>(null);
@@ -117,16 +134,21 @@ const SnakeGame: React.FC = () => {
       ctx.fillStyle = '#1A1F2C'; // arcade-darker color
       ctx.fillRect(0, 0, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE);
       
-      // Draw food
-      ctx.fillStyle = '#8B5CF6'; // arcade-purple color
-      ctx.fillRect(food.position.x * CELL_SIZE, food.position.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      // Draw food - different colors for normal items and skills
+      if (food.isSkill) {
+        ctx.fillStyle = '#8B5CF6'; // arcade-purple color for skills
+        ctx.fillRect(food.position.x * CELL_SIZE, food.position.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        
+        // Draw skill name
+        ctx.fillStyle = 'white';
+        ctx.font = '10px pixel, monospace';
+        const skillText = food.skill?.name.slice(0, 3) || '';
+        ctx.fillText(skillText, food.position.x * CELL_SIZE, (food.position.y * CELL_SIZE) + 14);
+      } else {
+        ctx.fillStyle = '#10B981'; // arcade-green color for normal items
+        ctx.fillRect(food.position.x * CELL_SIZE, food.position.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      }
 
-      // Draw skill name
-      ctx.fillStyle = 'white';
-      ctx.font = '10px pixel, monospace';
-      const skillText = food.skill.name.slice(0, 3);
-      ctx.fillText(skillText, food.position.x * CELL_SIZE, (food.position.y * CELL_SIZE) + 14);
-      
       // Draw snake
       snake.forEach((segment, index) => {
         if (index === 0) {
@@ -144,6 +166,11 @@ const SnakeGame: React.FC = () => {
       ctx.font = '20px pixel, monospace';
       ctx.fillText(`SCORE: ${score}`, 10, 25);
 
+      // Draw items collected counter
+      ctx.fillStyle = '#10B981'; // arcade-green color
+      ctx.font = '12px pixel, monospace';
+      ctx.fillText(`ITEMS: ${itemsCollected}/${ITEMS_BEFORE_SKILL}`, 10, 45);
+
       // Draw pause/play icon if game is paused
       if (paused && !gameOver) {
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -155,7 +182,7 @@ const SnakeGame: React.FC = () => {
     };
     
     drawGame();
-  }, [snake, food, score, paused]);
+  }, [snake, food, score, paused, itemsCollected]);
   
   const moveSnake = () => {
     if (gameOver || paused) return;
@@ -211,22 +238,36 @@ const SnakeGame: React.FC = () => {
     // Check if the snake has eaten the food
     if (head.x === food.position.x && head.y === food.position.y) {
       // Increase score
-      setScore(prevScore => prevScore + 1);
+      setScore(prevScore => prevScore + (food.isSkill ? 5 : 1)); // Skills worth more points
       
-      // Show skill dialog if popups are enabled
-      if (showPopups) {
-        setCollectedSkill(food.skill);
-        setOpenDialog(true);
+      if (food.isSkill && food.skill) {
+        // Show skill dialog if it's a skill food and popups are enabled
+        if (showPopups) {
+          setCollectedSkill(food.skill);
+          setOpenDialog(true);
+        }
+        // Play special sound for skill
+        playSound('success');
+        // Reset items collected counter after collecting a skill
+        setItemsCollected(0);
+        // Generate new normal food
+        setFood(generateFood(false));
+        // Increase speed
+        setSpeed(prevSpeed => prevSpeed / SPEED_INCREASE);
+      } else {
+        // Regular food collected
+        playSound('collect');
+        // Increment items collected counter
+        const newItemsCount = itemsCollected + 1;
+        setItemsCollected(newItemsCount);
+        
+        // Check if we should spawn a skill food
+        if (newItemsCount >= ITEMS_BEFORE_SKILL) {
+          setFood(generateFood(true));
+        } else {
+          setFood(generateFood(false));
+        }
       }
-      
-      // Play sound
-      playSound('collect');
-      
-      // Generate new food
-      setFood(getRandomSkill());
-      
-      // Increase speed
-      setSpeed(prevSpeed => prevSpeed / SPEED_INCREASE);
     } else {
       // Remove the tail if the snake didn't eat food
       newSnake.pop();
@@ -302,10 +343,11 @@ const SnakeGame: React.FC = () => {
       { x: 8, y: 10 },
     ]);
     setDirection('right');
-    setFood(getRandomSkill());
+    setFood(generateFood(false));
     setGameOver(false);
     setScore(0);
     setSpeed(INITIAL_SPEED);
+    setItemsCollected(0);
     directionQueueRef.current = [];
     playSound('click');
   };
@@ -338,12 +380,12 @@ const SnakeGame: React.FC = () => {
         className="border-2 border-arcade-purple mb-4"
       />
       
-      <div className="flex justify-between w-full px-4 mb-3">
-        <div className="text-arcade-green font-pixel text-sm">
-          Use arrow keys to control the snake
+      <div className="flex flex-col sm:flex-row justify-between w-full px-4 mb-3 gap-2">
+        <div className="text-arcade-green font-pixel text-xs sm:text-sm">
+          Arrow keys to control
         </div>
-        <div className="text-arcade-orange font-pixel text-sm">
-          Press 'Space' to {paused ? 'resume' : 'pause'}, 'R' to restart
+        <div className="text-arcade-orange font-pixel text-xs sm:text-sm">
+          Every {ITEMS_BEFORE_SKILL} items = 1 skill
         </div>
       </div>
 
@@ -354,8 +396,8 @@ const SnakeGame: React.FC = () => {
           onCheckedChange={togglePopups}
           className="bg-arcade-dark border-arcade-purple" 
         />
-        <label htmlFor="showPopups" className="text-white cursor-pointer">
-          Show skill popups when collecting items
+        <label htmlFor="showPopups" className="text-white cursor-pointer text-xs sm:text-sm">
+          Show skill popups when collecting
         </label>
       </div>
 
