@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ProjectCard from './ProjectCard';
 import ArcadeButton from './ArcadeButton';
@@ -60,8 +59,7 @@ const ProjectsSection: React.FC = () => {
         description: 'This interactive portfolio with arcade game aesthetics showcasing my full-stack development skills.',
         technologies: ['React', 'TypeScript', 'Tailwind CSS'],
         imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-        liveUrl: '#',
-        repoUrl: '#'
+        liveUrl: 'https://retro-quest-portfolio.lovable.app/',
       },
     ]
   ];
