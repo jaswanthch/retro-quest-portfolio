@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import ArcadeControls from '@/components/ArcadeControls';
 import ArcadeButton from '@/components/ArcadeButton';
@@ -43,7 +42,6 @@ const Index = () => {
   }, []);
   
   useEffect(() => {
-    // Listen for the custom event from SkillsSection
     const handleNavigateEvent = (event: CustomEvent) => {
       if (event.detail && event.detail.section) {
         setActiveSection(event.detail.section);
@@ -52,7 +50,6 @@ const Index = () => {
     
     window.addEventListener('navigateToSection', handleNavigateEvent as EventListener);
     
-    // Check URL parameters on mount
     const params = new URLSearchParams(window.location.search);
     const sectionParam = params.get('section');
     if (sectionParam) {
@@ -73,7 +70,6 @@ const Index = () => {
     
     setActiveSection(section);
     
-    // Update URL without reloading the page
     const url = new URL(window.location.href);
     url.searchParams.set('section', section);
     window.history.pushState({}, '', url);
