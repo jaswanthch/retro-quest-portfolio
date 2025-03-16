@@ -1,9 +1,8 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pause, Play, RefreshCw, ArrowRight, Check, XCircle } from 'lucide-react';
+import { Pause, Play, RefreshCw, ArrowRight, Check, XCircle, Joystick, Speaker } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -391,115 +390,173 @@ const SnakeGame: React.FC = () => {
   };
 
   return (
-    <div 
-      ref={gameContainerRef}
-      className="bg-arcade-darker p-6 rounded-lg pixel-corners border-2 border-arcade-purple flex flex-col items-center relative"
-      tabIndex={0}
-    >
-      <h2 className="text-xl text-white mb-4 font-pixel self-start">SKILL SNAKE GAME</h2>
-      
-      <div className="flex flex-col md:flex-row w-full gap-4 mb-4">
-        <div className="flex-1">
-          <canvas 
-            ref={canvasRef} 
-            width={GRID_SIZE * CELL_SIZE} 
-            height={GRID_SIZE * CELL_SIZE}
-            className="border-2 border-arcade-purple"
-          />
-        </div>
-        
-        <div className="flex-none w-full md:w-[200px]">
-          <Card className="bg-arcade-dark border-arcade-purple text-white h-full">
-            <CardHeader className="px-3 py-2">
-              <CardTitle className="text-arcade-green font-pixel text-sm">COLLECTED SKILLS</CardTitle>
-            </CardHeader>
-            <Separator className="bg-arcade-purple/30" />
-            <CardContent className="p-3 overflow-y-auto max-h-[300px]">
-              {skills.length > 0 ? (
-                <div className="grid grid-cols-1 gap-2">
-                  {skills.map((skill) => {
-                    const isCollected = capturedSkills.includes(skill.name);
-                    return (
-                      <div 
-                        key={skill.name} 
-                        className={`flex items-center gap-2 p-1.5 rounded-md ${isCollected ? 'bg-arcade-purple/20' : 'bg-arcade-darker'}`}
-                      >
-                        <div className="flex-none">
-                          {isCollected ? (
-                            <Check size={16} className="text-arcade-green" />
-                          ) : (
-                            <XCircle size={16} className="text-arcade-orange/50" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className={`text-xs font-pixel ${isCollected ? 'text-white' : 'text-gray-400'}`}>
-                            {skill.name}
-                          </p>
-                        </div>
-                        {isCollected && (
-                          <Badge 
-                            className="text-xxs bg-arcade-purple/50 hover:bg-arcade-purple" 
-                            variant="default"
-                          >
-                            CAUGHT
-                          </Badge>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-400 italic">No skills available</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      
-      <div className="flex flex-col sm:flex-row justify-between w-full px-4 mb-3 gap-2">
-        <div className="text-arcade-green font-pixel text-xs sm:text-sm">
-          Arrow keys to control
-        </div>
-        <div className="text-arcade-orange font-pixel text-xs sm:text-sm">
-          Every {ITEMS_BEFORE_SKILL} items = 1 skill
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2 text-sm mb-3">
-        <Checkbox 
-          id="showPopups" 
-          checked={showPopups} 
-          onCheckedChange={togglePopups}
-          className="bg-arcade-dark border-arcade-purple" 
-        />
-        <label htmlFor="showPopups" className="text-white cursor-pointer text-xs sm:text-sm">
-          Show skill popups when collecting
-        </label>
-      </div>
-
-      <button
-        onClick={() => setPaused(!paused)}
-        className="bg-arcade-purple text-white px-3 py-1 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2"
-      >
-        {paused ? <Play size={16} /> : <Pause size={16} />}
-        {paused ? 'RESUME' : 'PAUSE'}
-      </button>
-      
-      {gameOver && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
-          <div className="bg-arcade-darker p-6 rounded-lg border-2 border-arcade-purple text-center">
-            <h3 className="text-xl text-arcade-orange font-pixel mb-4">GAME OVER</h3>
-            <p className="text-white mb-4">Score: {score}</p>
-            <button 
-              onClick={resetGame}
-              className="bg-arcade-purple text-white px-6 py-2 rounded-lg font-pixel hover:bg-opacity-80"
-            >
-              PLAY AGAIN
-            </button>
+    <div className="relative w-full max-w-5xl mx-auto">
+      {/* Arcade Cabinet Frame */}
+      <div className="bg-[#221F26] rounded-t-3xl shadow-2xl border-b-0 pt-8 px-8 pb-0 border-4 border-[#403E43] relative overflow-hidden">
+        {/* Cabinet Top Edge with Speakers */}
+        <div className="absolute top-0 left-0 right-0 h-8 bg-[#0F1218] flex justify-between items-center px-6 border-b-4 border-[#403E43]">
+          <div className="flex items-center gap-1">
+            <Speaker size={16} className="text-gray-400" />
+            <div className="w-10 h-2 bg-[#333333] rounded-full"></div>
+          </div>
+          <div className="text-xs text-[#8A898C] font-pixel">SKILL SNAKE ARCADE</div>
+          <div className="flex items-center gap-1">
+            <div className="w-10 h-2 bg-[#333333] rounded-full"></div>
+            <Speaker size={16} className="text-gray-400" />
           </div>
         </div>
-      )}
+        
+        <div className="flex flex-col items-center mb-6">
+          <h2 className="text-2xl text-arcade-purple mb-3 font-pixel tracking-wider">SKILL SNAKE</h2>
+          <div className="w-full max-w-md relative">
+            <div className="absolute -top-1 -left-1 -right-1 -bottom-1 bg-gradient-to-br from-arcade-purple/70 to-arcade-blue/70 rounded-md blur-sm"></div>
+            <div className="bg-arcade-darker p-2 rounded-md relative">
+              <div className="text-center text-xs text-arcade-green font-pixel mb-1">HIGH SCORE: {localStorage.getItem('snakeHighScore') || '0'}</div>
+              <div className="flex justify-between">
+                <div className="text-xs text-white font-pixel">SCORE: {score}</div>
+                <div className="text-xs text-arcade-orange font-pixel">ITEMS: {itemsCollected}/{ITEMS_BEFORE_SKILL}</div>
+              </div>
+            </div>
+          </div>
+        
+        <div className="flex flex-col lg:flex-row gap-6 relative">
+          {/* Game Screen with CRT Effect */}
+          <div className="flex-1 relative">
+            <div className="absolute -inset-1 bg-gradient-to-br from-arcade-pink/20 via-arcade-purple/20 to-arcade-blue/20 blur"></div>
+            <div className="bg-black rounded-sm relative overflow-hidden crt">
+              <canvas 
+                ref={canvasRef} 
+                width={GRID_SIZE * CELL_SIZE} 
+                height={GRID_SIZE * CELL_SIZE}
+                className="border-4 border-[#221F26] rounded-sm"
+              />
+              {gameOver && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
+                  <div className="bg-arcade-darker p-6 rounded-lg border-2 border-arcade-purple text-center">
+                    <h3 className="text-xl text-arcade-orange font-pixel mb-4">GAME OVER</h3>
+                    <p className="text-white mb-4">Score: {score}</p>
+                    <button 
+                      onClick={resetGame}
+                      className="bg-arcade-purple text-white px-6 py-2 rounded-lg font-pixel hover:bg-opacity-80"
+                    >
+                      PLAY AGAIN
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Game Controls Info */}
+            <div className="mt-4 flex flex-col sm:flex-row justify-between gap-2">
+              <div className="text-arcade-green font-pixel text-xs">
+                Arrow keys to control
+              </div>
+              <div className="text-arcade-orange font-pixel text-xs">
+                Every {ITEMS_BEFORE_SKILL} items = 1 skill
+              </div>
+            </div>
+          </div>
+          
+          {/* Skill Collection Panel - Enlarged */}
+          <div className="w-full lg:w-[280px] relative">
+            <div className="absolute -inset-1 bg-gradient-to-br from-arcade-green/20 via-arcade-blue/20 to-arcade-orange/20 blur"></div>
+            <Card className="bg-arcade-dark border-2 border-arcade-purple text-white h-full relative overflow-hidden">
+              <CardHeader className="px-4 py-3 bg-arcade-darker border-b border-arcade-purple/30">
+                <CardTitle className="text-arcade-purple font-pixel text-base flex items-center gap-2">
+                  <Joystick size={18} className="text-arcade-purple" />
+                  COLLECTED SKILLS
+                </CardTitle>
+              </CardHeader>
+              <Separator className="bg-arcade-purple/30" />
+              <CardContent className="p-4 overflow-y-auto max-h-[400px] custom-scrollbar">
+                {skills.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {skills.map((skill) => {
+                      const isCollected = capturedSkills.includes(skill.name);
+                      return (
+                        <div 
+                          key={skill.name} 
+                          className={`flex items-center gap-3 p-2 rounded-md ${isCollected ? 'bg-arcade-purple/20' : 'bg-arcade-darker'} border ${isCollected ? 'border-arcade-purple/30' : 'border-gray-700'}`}
+                        >
+                          <div className="flex-none w-6 h-6 flex items-center justify-center">
+                            {isCollected ? (
+                              <div className="w-5 h-5 rounded-full bg-arcade-green/30 flex items-center justify-center">
+                                <Check size={14} className="text-arcade-green" />
+                              </div>
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center">
+                                <XCircle size={14} className="text-gray-600" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <p className={`text-sm font-pixel ${isCollected ? 'text-white' : 'text-gray-500'}`}>
+                              {skill.name}
+                            </p>
+                            {isCollected && (
+                              <p className="text-xs text-gray-400 mt-1 leading-tight">
+                                {skill.description}
+                              </p>
+                            )}
+                          </div>
+                          {isCollected && (
+                            <Badge 
+                              className="text-xxs bg-arcade-green/70 hover:bg-arcade-green" 
+                              variant="default"
+                            >
+                              CAUGHT
+                            </Badge>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 italic">No skills available</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        
+        {/* Control Panel */}
+        <div className="bg-[#1A1F2C] mt-6 p-5 border-t-4 border-[#403E43] rounded-b-lg shadow-inner flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setPaused(!paused)}
+              className="bg-arcade-purple text-white px-4 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2 shadow-lg"
+            >
+              {paused ? <Play size={16} /> : <Pause size={16} />}
+              {paused ? 'RESUME' : 'PAUSE'}
+            </button>
+            
+            <button
+              onClick={resetGame}
+              className="bg-arcade-orange text-white px-4 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2 shadow-lg"
+            >
+              <RefreshCw size={16} />
+              RESTART
+            </button>
+          </div>
+          
+          <div className="flex items-center space-x-2 text-sm">
+            <Checkbox 
+              id="showPopups" 
+              checked={showPopups} 
+              onCheckedChange={togglePopups}
+              className="bg-arcade-dark border-arcade-purple" 
+            />
+            <label htmlFor="showPopups" className="text-white cursor-pointer text-xs">
+              Show skill popups
+            </label>
+          </div>
+        </div>
+      </div>
       
+      {/* Arcade Machine Bottom */}
+      <div className="bg-[#1A1F2C] h-8 mx-auto border-4 border-[#403E43] border-t-0 rounded-b-3xl max-w-5xl"></div>
+      
+      {/* Dialog for collected skills */}
       <Dialog open={openDialog} onOpenChange={handleCloseDialog}>
         <DialogContent className="bg-arcade-darker border-2 border-arcade-purple">
           <DialogHeader>
@@ -543,7 +600,7 @@ const SnakeGame: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-arcade-green font-pixel text-xl">
               You joined the ranks!
-            </AlertDialogTitle>
+            </DialogTitle>
           </AlertDialogHeader>
           <p className="text-white py-4">
             Congratulations! You've collected all the skills. What would you like to do next?
