@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useContext, createContext } from "react";
 import { Volume2, VolumeX, Volume1, Settings } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -49,10 +50,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   
   // Handle volume changes when game state or volume changes
   useEffect(() => {
-    if (bgmRef.current && !isMuted) {
+    if (bgmRef.current) {
       // During game, reduce volume further
       const baseVolume = volume / 100;
-      bgmRef.current.volume = isGameActive ? baseVolume * 0.25 : baseVolume * 0.5;
+      const scaledVolume = isGameActive ? baseVolume * 0.25 : baseVolume * 0.5;
+      
+      // Apply volume if not muted, otherwise set to 0
+      bgmRef.current.volume = !isMuted ? scaledVolume : 0;
+      
+      // Play or pause based on mute state
+      if (!isMuted && bgmRef.current.paused) {
+        bgmRef.current.play().catch(e => console.error("BGM play failed:", e));
+      } else if (isMuted && !bgmRef.current.paused) {
+        bgmRef.current.pause();
+      }
     }
   }, [isGameActive, isMuted, volume]);
   
@@ -92,34 +103,18 @@ export const useArcadeSound = () => {
 
 const AudioController = () => {
   const { isMuted, setIsMuted, volume, setVolume } = useArcadeSound();
-  const bgmRef = useRef<HTMLAudioElement | null>(null);
-  
-  useEffect(() => {
-    bgmRef.current = new Audio(AUDIO_URLS.bgm);
-    bgmRef.current.loop = true;
-    bgmRef.current.volume = (volume / 100) * 0.5; // 50% max volume
-    
-    return () => {
-      if (bgmRef.current) {
-        bgmRef.current.pause();
-        bgmRef.current = null;
-      }
-    };
-  }, [volume]);
   
   const toggleMute = () => {
-    if (bgmRef.current) {
-      if (isMuted) {
-        bgmRef.current.play().catch(e => console.error("Audio play failed:", e));
-      } else {
-        bgmRef.current.pause();
-      }
-    }
     setIsMuted(!isMuted);
   };
 
   const handleVolumeChange = (value: number[]) => {
-    setVolume(value[0]);
+    // Ensure volume is never set to zero through the slider
+    // This prevents the volume from becoming zero when adjusting
+    const newVolume = Math.max(1, value[0]); // Minimum volume of 1%
+    setVolume(newVolume);
+    
+    console.log("Volume changed to:", newVolume);
   };
 
   const getVolumeIcon = () => {
@@ -154,7 +149,7 @@ const AudioController = () => {
             <h4 className="text-white font-medium text-sm">Volume Control</h4>
             <Slider 
               value={[volume]}
-              min={0}
+              min={1}
               max={100}
               step={1}
               onValueChange={handleVolumeChange}
