@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
@@ -88,6 +89,7 @@ const SnakeGame: React.FC = () => {
   const [speed, setSpeed] = useState<number>(INITIAL_SPEED);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [allSkillsCaptured, setAllSkillsCaptured] = useState<boolean>(false);
+  const [showAllSkillsDialog, setShowAllSkillsDialog] = useState<boolean>(false);
   const [collectedSkill, setCollectedSkill] = useState<{name: string, description: string} | null>(null);
   const [showPopups, setShowPopups] = useState<boolean>(true);
   const [itemsCollected, setItemsCollected] = useState<number>(0);
@@ -101,6 +103,11 @@ const SnakeGame: React.FC = () => {
     const savedSkills = JSON.parse(localStorage.getItem('collectedSkills') || '[]');
     setCapturedSkills(savedSkills);
     
+    // Check if all skills are captured
+    if (savedSkills.length >= skills.length) {
+      setAllSkillsCaptured(true);
+    }
+    
     setFood(generateFood(false, savedSkills));
   }, []);
 
@@ -110,10 +117,10 @@ const SnakeGame: React.FC = () => {
   }, [setIsGameActive]);
 
   useEffect(() => {
-    if (openDialog || allSkillsCaptured) {
+    if (openDialog) {
       setPaused(true);
     }
-  }, [openDialog, allSkillsCaptured]);
+  }, [openDialog]);
 
   useEffect(() => {
     const popupSetting = localStorage.getItem('snakeGameShowPopups');
@@ -245,21 +252,21 @@ const SnakeGame: React.FC = () => {
           newCapturedSkills.push(food.skill.name);
           setCapturedSkills(newCapturedSkills);
           localStorage.setItem('collectedSkills', JSON.stringify(newCapturedSkills));
-        }
-        
-        if (showPopups) {
-          setCollectedSkill(food.skill);
-          setOpenDialog(true);
+          
+          if (showPopups) {
+            setCollectedSkill(food.skill);
+            setOpenDialog(true);
+          }
+          
+          // Only show the "all skills captured" dialog the first time all skills are collected
+          if (newCapturedSkills.length >= skills.length && !allSkillsCaptured) {
+            setAllSkillsCaptured(true);
+            setShowAllSkillsDialog(true);
+          }
         }
         
         playSound('success');
         setItemsCollected(0);
-        
-        if (newCapturedSkills.length >= skills.length) {
-          setAllSkillsCaptured(true);
-          return;
-        }
-        
         setFood(generateFood(false, newCapturedSkills));
         setSpeed(prevSpeed => prevSpeed / SPEED_INCREASE);
       } else {
@@ -351,7 +358,7 @@ const SnakeGame: React.FC = () => {
     setScore(0);
     setSpeed(INITIAL_SPEED);
     setItemsCollected(0);
-    setAllSkillsCaptured(false);
+    setShowAllSkillsDialog(false);
     directionQueueRef.current = [];
     playSound('click');
   };
@@ -359,13 +366,15 @@ const SnakeGame: React.FC = () => {
   const resetAllSkills = () => {
     setCapturedSkills([]);
     localStorage.setItem('collectedSkills', JSON.stringify([]));
+    setAllSkillsCaptured(false);
     
     resetGame();
+    setShowAllSkillsDialog(false);
   };
 
   const continueGame = () => {
-    setAllSkillsCaptured(false);
     setPaused(false);
+    setShowAllSkillsDialog(false);
   };
 
   const togglePopups = () => {
@@ -376,7 +385,7 @@ const SnakeGame: React.FC = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    if (!gameOver && !allSkillsCaptured) {
+    if (!gameOver) {
       setPaused(false);
     }
   };
@@ -529,7 +538,7 @@ const SnakeGame: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      <AlertDialog open={allSkillsCaptured}>
+      <AlertDialog open={showAllSkillsDialog}>
         <AlertDialogContent className="bg-arcade-darker border-2 border-arcade-purple">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-arcade-green font-pixel text-xl">
