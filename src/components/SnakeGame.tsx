@@ -3,7 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pause, Play } from 'lucide-react';
+import { Pause, Play, RefreshCw, ArrowRight } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 type Position = {
   x: number;
@@ -43,15 +44,33 @@ const getRandomPosition = (): Position => ({
   y: Math.floor(Math.random() * GRID_SIZE),
 });
 
-const getRandomSkill = (): SkillFood['skill'] => 
-  skills[Math.floor(Math.random() * skills.length)];
+const getRandomSkill = (capturedSkills: string[]): SkillFood['skill'] | null => {
+  // Filter out already captured skills
+  const availableSkills = skills.filter(skill => !capturedSkills.includes(skill.name));
+  
+  // If no skills are available, return null
+  if (availableSkills.length === 0) {
+    return null;
+  }
+  
+  // Return a random skill from available skills
+  return availableSkills[Math.floor(Math.random() * availableSkills.length)];
+};
 
-const generateFood = (isSkill: boolean): SkillFood => {
+const generateFood = (isSkill: boolean, capturedSkills: string[]): SkillFood => {
   if (isSkill) {
+    const skill = getRandomSkill(capturedSkills);
+    // If no skills are available, generate normal food
+    if (!skill) {
+      return {
+        position: getRandomPosition(),
+        isSkill: false
+      };
+    }
     return {
       position: getRandomPosition(),
       isSkill: true,
-      skill: getRandomSkill()
+      skill
     };
   } else {
     return {
@@ -69,12 +88,14 @@ const SnakeGame: React.FC = () => {
     { x: 8, y: 10 },
   ]);
   const [direction, setDirection] = useState<string>('right');
-  const [food, setFood] = useState<SkillFood>(generateFood(false));
+  const [capturedSkills, setCapturedSkills] = useState<string[]>([]);
+  const [food, setFood] = useState<SkillFood>({ position: getRandomPosition(), isSkill: false });
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(INITIAL_SPEED);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [allSkillsCaptured, setAllSkillsCaptured] = useState<boolean>(false);
   const [collectedSkill, setCollectedSkill] = useState<{name: string, description: string} | null>(null);
   const [showPopups, setShowPopups] = useState<boolean>(true);
   const [itemsCollected, setItemsCollected] = useState<number>(0); // Track normal items collected
@@ -84,6 +105,15 @@ const SnakeGame: React.FC = () => {
   const directionQueueRef = useRef<string[]>([]);
   const gameContainerRef = useRef<HTMLDivElement>(null);
 
+  // Load captured skills from localStorage on component mount
+  useEffect(() => {
+    const savedSkills = JSON.parse(localStorage.getItem('collectedSkills') || '[]');
+    setCapturedSkills(savedSkills);
+    
+    // Initialize food based on captured skills
+    setFood(generateFood(false, savedSkills));
+  }, []);
+
   // Set the game active state when component mounts or unmounts
   useEffect(() => {
     setIsGameActive(true);
@@ -92,10 +122,10 @@ const SnakeGame: React.FC = () => {
 
   // Pause game when dialog opens
   useEffect(() => {
-    if (openDialog) {
+    if (openDialog || allSkillsCaptured) {
       setPaused(true);
     }
-  }, [openDialog]);
+  }, [openDialog, allSkillsCaptured]);
 
   useEffect(() => {
     // Load popup preferences
@@ -241,31 +271,49 @@ const SnakeGame: React.FC = () => {
       setScore(prevScore => prevScore + (food.isSkill ? 5 : 1)); // Skills worth more points
       
       if (food.isSkill && food.skill) {
+        // Add to captured skills
+        const newCapturedSkills = [...capturedSkills, food.skill.name];
+        setCapturedSkills(newCapturedSkills);
+        
+        // Save to localStorage
+        localStorage.setItem('collectedSkills', JSON.stringify(newCapturedSkills));
+        
         // Show skill dialog if it's a skill food and popups are enabled
         if (showPopups) {
           setCollectedSkill(food.skill);
           setOpenDialog(true);
         }
+        
         // Play special sound for skill
         playSound('success');
+        
         // Reset items collected counter after collecting a skill
         setItemsCollected(0);
+        
+        // Check if all skills are captured
+        if (newCapturedSkills.length >= skills.length) {
+          setAllSkillsCaptured(true);
+          return;
+        }
+        
         // Generate new normal food
-        setFood(generateFood(false));
+        setFood(generateFood(false, newCapturedSkills));
+        
         // Increase speed
         setSpeed(prevSpeed => prevSpeed / SPEED_INCREASE);
       } else {
         // Regular food collected
         playSound('collect');
+        
         // Increment items collected counter
         const newItemsCount = itemsCollected + 1;
         setItemsCollected(newItemsCount);
         
         // Check if we should spawn a skill food
         if (newItemsCount >= ITEMS_BEFORE_SKILL) {
-          setFood(generateFood(true));
+          setFood(generateFood(true, capturedSkills));
         } else {
-          setFood(generateFood(false));
+          setFood(generateFood(false, capturedSkills));
         }
       }
     } else {
@@ -343,13 +391,30 @@ const SnakeGame: React.FC = () => {
       { x: 8, y: 10 },
     ]);
     setDirection('right');
-    setFood(generateFood(false));
+    setFood(generateFood(false, capturedSkills));
     setGameOver(false);
+    setPaused(false);
     setScore(0);
     setSpeed(INITIAL_SPEED);
     setItemsCollected(0);
+    setAllSkillsCaptured(false);
     directionQueueRef.current = [];
     playSound('click');
+  };
+
+  const resetAllSkills = () => {
+    // Clear captured skills
+    setCapturedSkills([]);
+    localStorage.setItem('collectedSkills', JSON.stringify([]));
+    
+    // Reset the game
+    resetGame();
+  };
+
+  const continueGame = () => {
+    // Just close the dialog and unpause
+    setAllSkillsCaptured(false);
+    setPaused(false);
   };
 
   const togglePopups = () => {
@@ -360,7 +425,7 @@ const SnakeGame: React.FC = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    if (!gameOver) {
+    if (!gameOver && !allSkillsCaptured) {
       setPaused(false);
     }
   };
@@ -461,6 +526,37 @@ const SnakeGame: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+      
+      <AlertDialog open={allSkillsCaptured}>
+        <AlertDialogContent className="bg-arcade-darker border-2 border-arcade-purple">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-arcade-green font-pixel text-xl">
+              You joined the ranks!
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <p className="text-white py-4">
+            Congratulations! You've collected all the skills. What would you like to do next?
+          </p>
+          <AlertDialogFooter>
+            <div className="flex flex-col sm:flex-row gap-3 w-full justify-between">
+              <button
+                onClick={resetAllSkills}
+                className="bg-arcade-orange text-white px-6 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={16} />
+                RESET
+              </button>
+              <button
+                onClick={continueGame}
+                className="bg-arcade-purple text-white px-6 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center justify-center gap-2"
+              >
+                <ArrowRight size={16} />
+                CONTINUE
+              </button>
+            </div>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
