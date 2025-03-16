@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
@@ -44,29 +43,22 @@ const getRandomPosition = (): Position => ({
   y: Math.floor(Math.random() * GRID_SIZE),
 });
 
-const getRandomSkill = (capturedSkills: string[]): SkillFood['skill'] | null => {
+const getRandomSkill = (capturedSkills: string[]): SkillFood['skill'] => {
   // Filter out already captured skills
   const availableSkills = skills.filter(skill => !capturedSkills.includes(skill.name));
   
-  // If no skills are available, return null
-  if (availableSkills.length === 0) {
-    return null;
+  // If there are still uncaptured skills, prioritize them
+  if (availableSkills.length > 0) {
+    return availableSkills[Math.floor(Math.random() * availableSkills.length)];
   }
   
-  // Return a random skill from available skills
-  return availableSkills[Math.floor(Math.random() * availableSkills.length)];
+  // If all skills are captured, show any random skill
+  return skills[Math.floor(Math.random() * skills.length)];
 };
 
 const generateFood = (isSkill: boolean, capturedSkills: string[]): SkillFood => {
   if (isSkill) {
     const skill = getRandomSkill(capturedSkills);
-    // If no skills are available, generate normal food
-    if (!skill) {
-      return {
-        position: getRandomPosition(),
-        isSkill: false
-      };
-    }
     return {
       position: getRandomPosition(),
       isSkill: true,
@@ -98,29 +90,25 @@ const SnakeGame: React.FC = () => {
   const [allSkillsCaptured, setAllSkillsCaptured] = useState<boolean>(false);
   const [collectedSkill, setCollectedSkill] = useState<{name: string, description: string} | null>(null);
   const [showPopups, setShowPopups] = useState<boolean>(true);
-  const [itemsCollected, setItemsCollected] = useState<number>(0); // Track normal items collected
+  const [itemsCollected, setItemsCollected] = useState<number>(0);
   const { playSound, setIsGameActive } = useArcadeSound();
   
   const gameLoopRef = useRef<number | null>(null);
   const directionQueueRef = useRef<string[]>([]);
   const gameContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load captured skills from localStorage on component mount
   useEffect(() => {
     const savedSkills = JSON.parse(localStorage.getItem('collectedSkills') || '[]');
     setCapturedSkills(savedSkills);
     
-    // Initialize food based on captured skills
     setFood(generateFood(false, savedSkills));
   }, []);
 
-  // Set the game active state when component mounts or unmounts
   useEffect(() => {
     setIsGameActive(true);
     return () => setIsGameActive(false);
   }, [setIsGameActive]);
 
-  // Pause game when dialog opens
   useEffect(() => {
     if (openDialog || allSkillsCaptured) {
       setPaused(true);
@@ -128,14 +116,12 @@ const SnakeGame: React.FC = () => {
   }, [openDialog, allSkillsCaptured]);
 
   useEffect(() => {
-    // Load popup preferences
     const popupSetting = localStorage.getItem('snakeGameShowPopups');
     if (popupSetting !== null) {
       setShowPopups(popupSetting === 'true');
     }
   }, []);
 
-  // Prevent page scrolling with arrow keys
   useEffect(() => {
     const preventArrowScroll = (e: KeyboardEvent) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
@@ -143,10 +129,8 @@ const SnakeGame: React.FC = () => {
       }
     };
 
-    // Add the event listener to prevent default behavior for arrow keys
     window.addEventListener('keydown', preventArrowScroll);
 
-    // Clean up
     return () => {
       window.removeEventListener('keydown', preventArrowScroll);
     };
@@ -160,48 +144,40 @@ const SnakeGame: React.FC = () => {
     if (!ctx) return;
     
     const drawGame = () => {
-      // Clear canvas
-      ctx.fillStyle = '#1A1F2C'; // arcade-darker color
+      ctx.fillStyle = '#1A1F2C';
       ctx.fillRect(0, 0, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE);
       
-      // Draw food - different colors for normal items and skills
       if (food.isSkill) {
-        ctx.fillStyle = '#8B5CF6'; // arcade-purple color for skills
+        ctx.fillStyle = '#8B5CF6';
         ctx.fillRect(food.position.x * CELL_SIZE, food.position.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         
-        // Draw skill name
         ctx.fillStyle = 'white';
         ctx.font = '10px pixel, monospace';
         const skillText = food.skill?.name.slice(0, 3) || '';
         ctx.fillText(skillText, food.position.x * CELL_SIZE, (food.position.y * CELL_SIZE) + 14);
       } else {
-        ctx.fillStyle = '#10B981'; // arcade-green color for normal items
+        ctx.fillStyle = '#10B981';
         ctx.fillRect(food.position.x * CELL_SIZE, food.position.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       }
 
-      // Draw snake
       snake.forEach((segment, index) => {
         if (index === 0) {
-          // Head
-          ctx.fillStyle = '#D946EF'; // arcade-pink color
+          ctx.fillStyle = '#D946EF';
+          ctx.fillRect(segment.x * CELL_SIZE, segment.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         } else {
-          // Body
-          ctx.fillStyle = '#9b87f5'; // arcade-purple color
+          ctx.fillStyle = '#9b87f5';
+          ctx.fillRect(segment.x * CELL_SIZE, segment.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
-        ctx.fillRect(segment.x * CELL_SIZE, segment.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       });
       
-      // Draw score
-      ctx.fillStyle = '#33C3F0'; // arcade-blue color
+      ctx.fillStyle = '#33C3F0';
       ctx.font = '20px pixel, monospace';
       ctx.fillText(`SCORE: ${score}`, 10, 25);
 
-      // Draw items collected counter
-      ctx.fillStyle = '#10B981'; // arcade-green color
+      ctx.fillStyle = '#10B981';
       ctx.font = '12px pixel, monospace';
       ctx.fillText(`ITEMS: ${itemsCollected}/${ITEMS_BEFORE_SKILL}`, 10, 45);
 
-      // Draw pause/play icon if game is paused
       if (paused && !gameOver) {
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.fillRect(0, 0, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE);
@@ -217,7 +193,6 @@ const SnakeGame: React.FC = () => {
   const moveSnake = () => {
     if (gameOver || paused) return;
     
-    // Process the next direction from the queue if available
     if (directionQueueRef.current.length > 0) {
       const nextDirection = directionQueueRef.current.shift();
       if (nextDirection) {
@@ -225,12 +200,9 @@ const SnakeGame: React.FC = () => {
       }
     }
     
-    // Create a copy of the snake array
     const newSnake = [...snake];
-    // Get the head of the snake
     const head = { ...newSnake[0] };
     
-    // Move the head based on the direction
     switch (direction) {
       case 'up':
         head.y -= 1;
@@ -248,7 +220,6 @@ const SnakeGame: React.FC = () => {
         break;
     }
     
-    // Check if the game is over (collision with walls or self)
     if (
       head.x < 0 || head.x >= GRID_SIZE ||
       head.y < 0 || head.y >= GRID_SIZE ||
@@ -262,54 +233,40 @@ const SnakeGame: React.FC = () => {
       return;
     }
     
-    // Add the new head to the beginning of the snake array
     newSnake.unshift(head);
     
-    // Check if the snake has eaten the food
     if (head.x === food.position.x && head.y === food.position.y) {
-      // Increase score
-      setScore(prevScore => prevScore + (food.isSkill ? 5 : 1)); // Skills worth more points
+      setScore(prevScore => prevScore + (food.isSkill ? 5 : 1));
       
       if (food.isSkill && food.skill) {
-        // Add to captured skills
         const newCapturedSkills = [...capturedSkills, food.skill.name];
         setCapturedSkills(newCapturedSkills);
         
-        // Save to localStorage
         localStorage.setItem('collectedSkills', JSON.stringify(newCapturedSkills));
         
-        // Show skill dialog if it's a skill food and popups are enabled
         if (showPopups) {
           setCollectedSkill(food.skill);
           setOpenDialog(true);
         }
         
-        // Play special sound for skill
         playSound('success');
         
-        // Reset items collected counter after collecting a skill
         setItemsCollected(0);
         
-        // Check if all skills are captured
         if (newCapturedSkills.length >= skills.length) {
           setAllSkillsCaptured(true);
           return;
         }
         
-        // Generate new normal food
         setFood(generateFood(false, newCapturedSkills));
         
-        // Increase speed
         setSpeed(prevSpeed => prevSpeed / SPEED_INCREASE);
       } else {
-        // Regular food collected
         playSound('collect');
         
-        // Increment items collected counter
         const newItemsCount = itemsCollected + 1;
         setItemsCollected(newItemsCount);
         
-        // Check if we should spawn a skill food
         if (newItemsCount >= ITEMS_BEFORE_SKILL) {
           setFood(generateFood(true, capturedSkills));
         } else {
@@ -317,11 +274,9 @@ const SnakeGame: React.FC = () => {
         }
       }
     } else {
-      // Remove the tail if the snake didn't eat food
       newSnake.pop();
     }
     
-    // Update the snake state
     setSnake(newSnake);
   };
   
@@ -351,11 +306,9 @@ const SnakeGame: React.FC = () => {
           }
           break;
         case ' ':
-          // Space bar to pause/resume
           setPaused(prev => !prev);
           break;
         case 'r':
-          // R key to restart
           if (gameOver) {
             resetGame();
           }
@@ -403,16 +356,13 @@ const SnakeGame: React.FC = () => {
   };
 
   const resetAllSkills = () => {
-    // Clear captured skills
     setCapturedSkills([]);
     localStorage.setItem('collectedSkills', JSON.stringify([]));
     
-    // Reset the game
     resetGame();
   };
 
   const continueGame = () => {
-    // Just close the dialog and unpause
     setAllSkillsCaptured(false);
     setPaused(false);
   };
@@ -434,7 +384,7 @@ const SnakeGame: React.FC = () => {
     <div 
       ref={gameContainerRef}
       className="bg-arcade-darker p-6 rounded-lg pixel-corners border-2 border-arcade-purple flex flex-col items-center relative"
-      tabIndex={0} // Make the container focusable
+      tabIndex={0}
     >
       <h2 className="text-xl text-white mb-4 font-pixel self-start">SKILL SNAKE GAME</h2>
       
