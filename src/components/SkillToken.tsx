@@ -9,9 +9,10 @@ interface SkillTokenProps {
   description: string;
   x: number;
   y: number;
+  color?: string;
 }
 
-const SkillToken: React.FC<SkillTokenProps> = ({ name, icon, description, x, y }) => {
+const SkillToken: React.FC<SkillTokenProps> = ({ name, icon, description, x, y, color }) => {
   const [collected, setCollected] = useState(false);
   const { playSound } = useArcadeSound();
   
@@ -46,7 +47,7 @@ const SkillToken: React.FC<SkillTokenProps> = ({ name, icon, description, x, y }
       style={{ 
         left: `${x}%`, 
         top: `${y}%`,
-        background: collected ? 'rgba(155, 135, 245, 0.3)' : 'rgba(155, 135, 245, 0.8)',
+        background: collected ? 'rgba(155, 135, 245, 0.3)' : (color || 'rgba(155, 135, 245, 0.8)'),
         width: '32px',
         height: '32px',
         borderRadius: '50%',
@@ -54,7 +55,7 @@ const SkillToken: React.FC<SkillTokenProps> = ({ name, icon, description, x, y }
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
-        boxShadow: collected ? 'none' : '0 0 8px rgba(155, 135, 245, 0.8)',
+        boxShadow: collected ? 'none' : `0 0 8px ${color || 'rgba(155, 135, 245, 0.8)'}`,
       }}
       onClick={handleCollect}
     >

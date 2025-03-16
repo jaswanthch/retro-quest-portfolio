@@ -2,6 +2,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Pause, Play } from 'lucide-react';
 
 type Position = {
   x: number;
@@ -59,10 +61,26 @@ const SnakeGame: React.FC = () => {
   const [speed, setSpeed] = useState<number>(INITIAL_SPEED);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [collectedSkill, setCollectedSkill] = useState<{name: string, description: string} | null>(null);
+  const [showPopups, setShowPopups] = useState<boolean>(true);
   const { playSound } = useArcadeSound();
   
   const gameLoopRef = useRef<number | null>(null);
   const directionQueueRef = useRef<string[]>([]);
+
+  // Pause game when dialog opens
+  useEffect(() => {
+    if (openDialog) {
+      setPaused(true);
+    }
+  }, [openDialog]);
+
+  useEffect(() => {
+    // Load popup preferences
+    const popupSetting = localStorage.getItem('snakeGameShowPopups');
+    if (popupSetting !== null) {
+      setShowPopups(popupSetting === 'true');
+    }
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -102,10 +120,19 @@ const SnakeGame: React.FC = () => {
       ctx.fillStyle = '#33C3F0'; // arcade-blue color
       ctx.font = '20px pixel, monospace';
       ctx.fillText(`SCORE: ${score}`, 10, 25);
+
+      // Draw pause/play icon if game is paused
+      if (paused && !gameOver) {
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(0, 0, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE);
+        ctx.fillStyle = 'white';
+        ctx.font = '20px pixel, monospace';
+        ctx.fillText('PAUSED', GRID_SIZE * CELL_SIZE / 2 - 45, GRID_SIZE * CELL_SIZE / 2);
+      }
     };
     
     drawGame();
-  }, [snake, food, score]);
+  }, [snake, food, score, paused]);
   
   const moveSnake = () => {
     if (gameOver || paused) return;
@@ -148,7 +175,7 @@ const SnakeGame: React.FC = () => {
       newSnake.some(segment => segment.x === head.x && segment.y === head.y)
     ) {
       setGameOver(true);
-      playSound('gameOver');
+      playSound('error');
       if (gameLoopRef.current) {
         clearTimeout(gameLoopRef.current);
       }
@@ -163,9 +190,11 @@ const SnakeGame: React.FC = () => {
       // Increase score
       setScore(prevScore => prevScore + 1);
       
-      // Show skill dialog
-      setCollectedSkill(food.skill);
-      setOpenDialog(true);
+      // Show skill dialog if popups are enabled
+      if (showPopups) {
+        setCollectedSkill(food.skill);
+        setOpenDialog(true);
+      }
       
       // Play sound
       playSound('collect');
@@ -258,6 +287,19 @@ const SnakeGame: React.FC = () => {
     playSound('click');
   };
 
+  const togglePopups = () => {
+    const newValue = !showPopups;
+    setShowPopups(newValue);
+    localStorage.setItem('snakeGameShowPopups', newValue.toString());
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    if (!gameOver) {
+      setPaused(false);
+    }
+  };
+
   return (
     <div className="bg-arcade-darker p-6 rounded-lg pixel-corners border-2 border-arcade-purple flex flex-col items-center relative">
       <h2 className="text-xl text-white mb-4 font-pixel self-start">SKILL SNAKE GAME</h2>
@@ -269,14 +311,34 @@ const SnakeGame: React.FC = () => {
         className="border-2 border-arcade-purple mb-4"
       />
       
-      <div className="flex justify-between w-full px-4">
-        <div className="text-arcade-green font-pixel">
+      <div className="flex justify-between w-full px-4 mb-3">
+        <div className="text-arcade-green font-pixel text-sm">
           Use arrow keys to control the snake
         </div>
-        <div className="text-arcade-orange font-pixel">
-          Press 'Space' to pause, 'R' to restart
+        <div className="text-arcade-orange font-pixel text-sm">
+          Press 'Space' to {paused ? 'resume' : 'pause'}, 'R' to restart
         </div>
       </div>
+
+      <div className="flex items-center space-x-2 text-sm mb-3">
+        <Checkbox 
+          id="showPopups" 
+          checked={showPopups} 
+          onCheckedChange={togglePopups}
+          className="bg-arcade-dark border-arcade-purple" 
+        />
+        <label htmlFor="showPopups" className="text-white cursor-pointer">
+          Show skill popups when collecting items
+        </label>
+      </div>
+
+      <button
+        onClick={() => setPaused(!paused)}
+        className="bg-arcade-purple text-white px-3 py-1 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2"
+      >
+        {paused ? <Play size={16} /> : <Pause size={16} />}
+        {paused ? 'RESUME' : 'PAUSE'}
+      </button>
       
       {gameOver && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
@@ -293,7 +355,7 @@ const SnakeGame: React.FC = () => {
         </div>
       )}
       
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+      <Dialog open={openDialog} onOpenChange={handleCloseDialog}>
         <DialogContent className="bg-arcade-darker border-2 border-arcade-purple">
           <DialogHeader>
             <DialogTitle className="text-arcade-green font-pixel text-xl">
@@ -310,6 +372,23 @@ const SnakeGame: React.FC = () => {
             <p className="text-arcade-orange mt-4 text-sm">
               Snake speed increased! Keep collecting skills!
             </p>
+            <div className="flex justify-between mt-4">
+              <button 
+                onClick={handleCloseDialog}
+                className="bg-arcade-purple text-white px-4 py-1 rounded font-pixel hover:bg-opacity-80"
+              >
+                CONTINUE
+              </button>
+              <button 
+                onClick={() => {
+                  togglePopups();
+                  handleCloseDialog();
+                }}
+                className="bg-arcade-orange text-white px-4 py-1 rounded font-pixel hover:bg-opacity-80"
+              >
+                {showPopups ? "DISABLE POPUPS" : "ENABLE POPUPS"}
+              </button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
