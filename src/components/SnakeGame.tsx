@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
@@ -239,27 +240,33 @@ const SnakeGame: React.FC = () => {
       setScore(prevScore => prevScore + (food.isSkill ? 5 : 1));
       
       if (food.isSkill && food.skill) {
-        const newCapturedSkills = [...capturedSkills, food.skill.name];
-        setCapturedSkills(newCapturedSkills);
+        // Update captured skills
+        const newCapturedSkills = [...capturedSkills];
         
-        localStorage.setItem('collectedSkills', JSON.stringify(newCapturedSkills));
+        // Only add the skill if it's not already captured
+        if (!newCapturedSkills.includes(food.skill.name)) {
+          newCapturedSkills.push(food.skill.name);
+          setCapturedSkills(newCapturedSkills);
+          localStorage.setItem('collectedSkills', JSON.stringify(newCapturedSkills));
+        }
         
+        // Show the skill popup if enabled
         if (showPopups) {
           setCollectedSkill(food.skill);
           setOpenDialog(true);
         }
         
         playSound('success');
-        
         setItemsCollected(0);
         
+        // Check if all skills are captured
         if (newCapturedSkills.length >= skills.length) {
           setAllSkillsCaptured(true);
           return;
         }
         
+        // Generate new food
         setFood(generateFood(false, newCapturedSkills));
-        
         setSpeed(prevSpeed => prevSpeed / SPEED_INCREASE);
       } else {
         playSound('collect');
