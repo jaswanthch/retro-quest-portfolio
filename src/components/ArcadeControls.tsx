@@ -77,7 +77,7 @@ const ArcadeControls: React.FC<ArcadeControlsProps> = ({ onControlClick, activeS
         
         <div className="flex flex-col items-center">
           <ArcadeButton 
-            color="red"
+            color="pink"
             onClick={() => handleButtonClick('start')}
             className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
           >
