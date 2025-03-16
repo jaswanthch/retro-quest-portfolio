@@ -1,119 +1,89 @@
 
 import React from 'react';
+import { UserRound, Code, Briefcase, Send, Power, Gamepad2 } from 'lucide-react';
 import { useArcadeSound } from './AudioController';
+import ArcadeButton from './ArcadeButton';
 
 interface ArcadeControlsProps {
-  onControlClick: (control: string) => void;
+  onControlClick: (section: string) => void;
   activeSection: string;
 }
 
-const ArcadeControls: React.FC<ArcadeControlsProps> = ({ 
-  onControlClick, 
-  activeSection 
-}) => {
+const ArcadeControls: React.FC<ArcadeControlsProps> = ({ onControlClick, activeSection }) => {
   const { playSound } = useArcadeSound();
-  
-  const handleClick = (section: string) => {
+
+  const handleButtonClick = (section: string) => {
     playSound('click');
     onControlClick(section);
   };
 
   return (
-    <div className="w-full bg-arcade-darker p-4 rounded-lg pixel-corners border-2 border-arcade-purple">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="bg-arcade-darker rounded-lg p-4 border-2 border-arcade-purple">
+      <div className="flex flex-wrap justify-center gap-4">
         <div className="flex flex-col items-center">
-          <div className="relative w-20 h-20">
-            <div className="absolute inset-0 rounded-full bg-arcade-darker border-4 border-arcade-blue"></div>
-            <button
-              className={`absolute top-0 left-1/2 -translate-x-1/2 w-8 h-8 rounded-md bg-arcade-blue ${
-                activeSection === 'about' ? 'bg-opacity-100' : 'bg-opacity-70 hover:bg-opacity-100'
-              } transition-all`}
-              onClick={() => handleClick('about')}
-              aria-label="About"
-            ></button>
-            <button
-              className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-8 rounded-md bg-arcade-blue ${
-                activeSection === 'projects' ? 'bg-opacity-100' : 'bg-opacity-70 hover:bg-opacity-100'
-              } transition-all`}
-              onClick={() => handleClick('projects')}
-              aria-label="Projects"
-            ></button>
-            <button
-              className={`absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 rounded-md bg-arcade-blue ${
-                activeSection === 'skills' ? 'bg-opacity-100' : 'bg-opacity-70 hover:bg-opacity-100'
-              } transition-all`}
-              onClick={() => handleClick('skills')}
-              aria-label="Skills"
-            ></button>
-            <button
-              className={`absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 rounded-md bg-arcade-blue ${
-                activeSection === 'contact' ? 'bg-opacity-100' : 'bg-opacity-70 hover:bg-opacity-100'
-              } transition-all`}
-              onClick={() => handleClick('contact')}
-              aria-label="Contact"
-            ></button>
-          </div>
-          <p className="text-xs text-gray-400 mt-2 font-pixel">JOYSTICK</p>
-        </div>
-        
-        <div className="flex gap-6">
-          <div className="flex flex-col items-center">
-            <button
-              className={`w-12 h-12 rounded-full bg-arcade-orange ${
-                activeSection === 'about' ? 'animate-pulse-glow' : ''
-              } hover:animate-pulse-glow transition-all`}
-              onClick={() => handleClick('about')}
-            >
-              <span className="font-pixel text-white">A</span>
-            </button>
-            <p className="text-xs text-gray-400 mt-1">ABOUT</p>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <button
-              className={`w-12 h-12 rounded-full bg-arcade-green ${
-                activeSection === 'skills' ? 'animate-pulse-glow' : ''
-              } hover:animate-pulse-glow transition-all`}
-              onClick={() => handleClick('skills')}
-            >
-              <span className="font-pixel text-white">B</span>
-            </button>
-            <p className="text-xs text-gray-400 mt-1">SKILLS</p>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <button
-              className={`w-12 h-12 rounded-full bg-arcade-purple ${
-                activeSection === 'projects' ? 'animate-pulse-glow' : ''
-              } hover:animate-pulse-glow transition-all`}
-              onClick={() => handleClick('projects')}
-            >
-              <span className="font-pixel text-white">X</span>
-            </button>
-            <p className="text-xs text-gray-400 mt-1">PROJECTS</p>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <button
-              className={`w-12 h-12 rounded-full bg-arcade-blue ${
-                activeSection === 'contact' ? 'animate-pulse-glow' : ''
-              } hover:animate-pulse-glow transition-all`}
-              onClick={() => handleClick('contact')}
-            >
-              <span className="font-pixel text-white">Y</span>
-            </button>
-            <p className="text-xs text-gray-400 mt-1">CONTACT</p>
-          </div>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <button
-            className="w-24 h-10 bg-arcade-pink rounded-lg font-pixel text-white text-sm"
-            onClick={() => handleClick('start')}
+          <ArcadeButton 
+            color={activeSection === 'about' ? 'green' : 'purple'}
+            onClick={() => handleButtonClick('about')}
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
           >
-            START
-          </button>
-          <p className="text-xs text-gray-400 mt-1">RESET</p>
+            <UserRound size={24} />
+          </ArcadeButton>
+          <span className="text-xs font-pixel text-gray-300">ABOUT</span>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <ArcadeButton 
+            color={activeSection === 'skills' ? 'green' : 'blue'}
+            onClick={() => handleButtonClick('skills')}
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+          >
+            <Code size={24} />
+          </ArcadeButton>
+          <span className="text-xs font-pixel text-gray-300">SKILLS</span>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <ArcadeButton 
+            color={activeSection === 'projects' ? 'green' : 'orange'}
+            onClick={() => handleButtonClick('projects')}
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+          >
+            <Briefcase size={24} />
+          </ArcadeButton>
+          <span className="text-xs font-pixel text-gray-300">PROJECTS</span>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <ArcadeButton 
+            color={activeSection === 'contact' ? 'green' : 'pink'}
+            onClick={() => handleButtonClick('contact')}
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+          >
+            <Send size={24} />
+          </ArcadeButton>
+          <span className="text-xs font-pixel text-gray-300">CONTACT</span>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <ArcadeButton 
+            color={activeSection === 'game' ? 'green' : 'blue'}
+            onClick={() => handleButtonClick('game')}
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+          >
+            <Gamepad2 size={24} />
+          </ArcadeButton>
+          <span className="text-xs font-pixel text-gray-300">GAME</span>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <ArcadeButton 
+            color="orange"
+            onClick={() => handleButtonClick('start')}
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+          >
+            <Power size={24} />
+          </ArcadeButton>
+          <span className="text-xs font-pixel text-gray-300">RESET</span>
         </div>
       </div>
     </div>

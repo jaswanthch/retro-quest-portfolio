@@ -7,6 +7,7 @@ import AboutSection from '@/components/AboutSection';
 import SkillsSection from '@/components/SkillsSection';
 import ProjectsSection from '@/components/ProjectsSection';
 import ContactSection from '@/components/ContactSection';
+import SnakeGame from '@/components/SnakeGame';
 import AudioController from '@/components/AudioController';
 import { toast } from '@/components/ui/use-toast';
 
@@ -83,6 +84,8 @@ const Index = () => {
         return <ProjectsSection />;
       case 'contact':
         return <ContactSection />;
+      case 'game':
+        return <SnakeGame />;
       default:
         return <AboutSection />;
     }
@@ -98,7 +101,7 @@ const Index = () => {
       
       <div className="container mx-auto px-4">
         <header className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-pixel text-arcade-purple mb-2">RETRO QUEST</h1>
+          <h1 className="text-4xl md:text-5xl font-pixel text-arcade-purple mb-2">JASWANTH'S QUEST</h1>
           <p className="text-gray-300">A Full-Stack Developer's Arcade Adventure</p>
         </header>
         
@@ -132,10 +135,20 @@ const Index = () => {
             onControlClick={handleControlClick}
             activeSection={activeSection}
           />
+          
+          <div className="flex justify-center mt-4">
+            <ArcadeButton 
+              color="orange" 
+              className="px-6"
+              onClick={() => setActiveSection('game')}
+            >
+              PLAY SNAKE GAME
+            </ArcadeButton>
+          </div>
         </div>
         
         <footer className="text-center text-gray-400 text-sm">
-          <p>© 2023 RETRO QUEST. All rights reserved.</p>
+          <p>© 2023 JASWANTH'S QUEST. All rights reserved.</p>
           <p className="mt-1 text-xs">Use arrow keys or arcade controls to navigate</p>
         </footer>
       </div>

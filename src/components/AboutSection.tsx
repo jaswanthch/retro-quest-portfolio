@@ -11,16 +11,16 @@ const AboutSection: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex-1">
           <p className="text-gray-300 mb-4">
-            Full-stack developer with a passion for creating interactive, user-friendly applications. 
-            Specializing in modern web technologies and responsive design.
+            Hi, I'm Jaswanth, a Full-Stack JavaScript & WordPress Developer with a passion for creating 
+            interactive, user-friendly applications and websites.
           </p>
           <p className="text-gray-300 mb-4">
-            Level 5 JavaScript Wizard with proficiency in React, Node.js, and TypeScript.
-            Skilled in crafting clean, maintainable code and solving complex problems.
+            I specialize in modern web technologies including React, TypeScript, Next.js, and WordPress development.
+            My focus is on crafting clean, maintainable code and solving complex problems.
           </p>
           <p className="text-gray-300 mb-6">
-            When not coding, I can be found leveling up my skills, exploring new technologies,
-            and contributing to open-source projects.
+            When not coding, I can be found exploring new technologies, contributing to open-source projects,
+            and continuing to expand my development toolkit.
           </p>
           
           <ArcadeButton color="green" className="inline-block">
@@ -30,28 +30,28 @@ const AboutSection: React.FC = () => {
         
         <div className="flex-1">
           <div className="bg-arcade-dark p-4 rounded-md border border-arcade-purple mb-4">
-            <h3 className="text-arcade-green font-pixel text-sm mb-2">STATS</h3>
+            <h3 className="text-arcade-green font-pixel text-sm mb-2">TECH POWERS</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-gray-400 text-xs">HTML/CSS</p>
+                <p className="text-gray-400 text-xs">JavaScript/TypeScript</p>
                 <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                   <div className="h-full bg-arcade-green w-[95%]"></div>
                 </div>
               </div>
               <div>
-                <p className="text-gray-400 text-xs">JavaScript</p>
+                <p className="text-gray-400 text-xs">React/Next.js</p>
                 <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                   <div className="h-full bg-arcade-blue w-[90%]"></div>
                 </div>
               </div>
               <div>
-                <p className="text-gray-400 text-xs">React</p>
+                <p className="text-gray-400 text-xs">WordPress/PHP</p>
                 <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                   <div className="h-full bg-arcade-purple w-[85%]"></div>
                 </div>
               </div>
               <div>
-                <p className="text-gray-400 text-xs">Node.js</p>
+                <p className="text-gray-400 text-xs">MySQL/MongoDB</p>
                 <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                   <div className="h-full bg-arcade-orange w-[80%]"></div>
                 </div>
@@ -64,15 +64,15 @@ const AboutSection: React.FC = () => {
             <ul className="text-gray-300 text-sm space-y-2">
               <li className="flex items-center">
                 <span className="inline-block w-2 h-2 bg-arcade-orange rounded-full mr-2"></span>
-                Released 5 major web applications
+                Developed multiple full-stack web applications
               </li>
               <li className="flex items-center">
                 <span className="inline-block w-2 h-2 bg-arcade-orange rounded-full mr-2"></span>
-                Contributed to 10+ open source projects
+                Created custom WordPress plugins and themes
               </li>
               <li className="flex items-center">
                 <span className="inline-block w-2 h-2 bg-arcade-orange rounded-full mr-2"></span>
-                Mastered 3 programming languages
+                Mastered both JavaScript and PHP ecosystems
               </li>
             </ul>
           </div>
