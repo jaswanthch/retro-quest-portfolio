@@ -22,7 +22,6 @@ const ProjectsSection: React.FC = () => {
         technologies: ['React', 'JavaScript', 'CSS'],
         imageUrl: 'https://images.unsplash.com/photo-1545078165-9865d8be2512?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
         liveUrl: 'https://favicongenerator.chjaswanth.com/',
-        repoUrl: '#'
       },
     ],
     // Level 2 Projects
@@ -33,7 +32,6 @@ const ProjectsSection: React.FC = () => {
         technologies: ['Next.js', 'React', 'AI'],
         imageUrl: 'https://images.unsplash.com/photo-1562577309-4932fdd64cd1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
         liveUrl: 'https://seoanalyzer.chjaswanth.com/',
-        repoUrl: '#'
       },
       {
         title: 'Free Invoice Generator',
@@ -41,7 +39,6 @@ const ProjectsSection: React.FC = () => {
         technologies: ['React', 'JavaScript', 'PDF Generation'],
         imageUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
         liveUrl: 'https://invoicegenerator.chjaswanth.com/',
-        repoUrl: '#'
       },
     ],
     // Level 3 Projects
@@ -52,7 +49,6 @@ const ProjectsSection: React.FC = () => {
         technologies: ['Next.js', 'React', 'AI', 'TypeScript'],
         imageUrl: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
         liveUrl: 'https://contentusher.com',
-        repoUrl: '#'
       },
       {
         title: 'Arcade Portfolio',
