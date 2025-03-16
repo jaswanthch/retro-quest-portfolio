@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useContext, createContext } from "react";
 import { Volume2, VolumeX, Volume1, Settings } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -8,7 +7,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 interface AudioContextType {
   isMuted: boolean;
   setIsMuted: React.Dispatch<React.SetStateAction<boolean>>;
-  playSound: (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error' | 'gameover') => void;
+  playSound: (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error' | 'gameover' | 'powerup') => void;
   isGameActive: boolean;
   setIsGameActive: React.Dispatch<React.SetStateAction<boolean>>;
   volume: number;
@@ -25,7 +24,8 @@ const AUDIO_URLS = {
   collect: "/audio/collect.mp3",
   success: "/audio/success.mp3",
   error: "/audio/error.mp3",
-  gameover: "/audio/error.mp3" // Using error.mp3 as placeholder for gameover
+  gameover: "/audio/error.mp3", // Using error.mp3 as placeholder for gameover
+  powerup: "/audio/success.mp3"  // Using success.mp3 as placeholder for powerup
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -56,7 +56,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [isGameActive, isMuted, volume]);
   
-  const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error' | 'gameover') => {
+  const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error' | 'gameover' | 'powerup') => {
     if (isMuted) return;
     
     const sound = new Audio(AUDIO_URLS[soundType]);

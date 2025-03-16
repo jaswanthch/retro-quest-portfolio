@@ -317,7 +317,7 @@ const SnakeGame: React.FC = () => {
           }
         }
         
-        playSound('success');
+        playSound('powerup');
         setItemsCollected(0);
         setFood(generateFood(false, newCapturedSkills));
         setSpeed(prevSpeed => prevSpeed / SPEED_INCREASE);
