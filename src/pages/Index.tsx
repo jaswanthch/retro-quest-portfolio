@@ -61,7 +61,7 @@ const Index = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-arcade-darker flex-col w-full">
-        <h1 className="text-2xl md:text-3xl font-pixel text-arcade-purple mb-8">RETRO QUEST</h1>
+        <h1 className="text-2xl md:text-3xl font-pixel text-arcade-purple mb-8">JASWANTH'S QUEST</h1>
         <div className="w-64 h-6 bg-arcade-dark border-2 border-arcade-purple rounded-lg overflow-hidden">
           <div
             ref={loadingBarRef}
