@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import ArcadeControls from '@/components/ArcadeControls';
 import ArcadeButton from '@/components/ArcadeButton';
@@ -9,11 +10,13 @@ import ContactSection from '@/components/ContactSection';
 import SnakeGame from '@/components/SnakeGame';
 import AudioController, { AudioProvider } from '@/components/AudioController';
 import { toast } from '@/components/ui/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('about');
   const [isLoading, setIsLoading] = useState(true);
   const loadingBarRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     const loadingInterval = setInterval(() => {
@@ -57,8 +60,8 @@ const Index = () => {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-arcade-darker flex-col">
-        <h1 className="text-3xl font-pixel text-arcade-purple mb-8">RETRO QUEST</h1>
+      <div className="min-h-screen flex items-center justify-center bg-arcade-darker flex-col w-full">
+        <h1 className="text-2xl md:text-3xl font-pixel text-arcade-purple mb-8">RETRO QUEST</h1>
         <div className="w-64 h-6 bg-arcade-dark border-2 border-arcade-purple rounded-lg overflow-hidden">
           <div
             ref={loadingBarRef}
@@ -90,30 +93,30 @@ const Index = () => {
 
   return (
     <AudioProvider>
-      <div className="min-h-screen bg-arcade-dark text-white pb-8 pt-4 relative overflow-hidden">
+      <div className="min-h-screen w-full bg-arcade-dark text-white pb-4 pt-4 relative overflow-hidden">
         <div className="scanlines"></div>
         
         <AudioController />
         
-        <div className="container mx-auto px-4">
-          <header className="mb-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-pixel text-arcade-purple mb-2">JASWANTH'S QUEST</h1>
-            <p className="text-gray-300">A Full-Stack Developer's Arcade Adventure</p>
+        <div className="container mx-auto px-2 sm:px-4 max-w-full">
+          <header className="mb-4 md:mb-8 text-center">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-pixel text-arcade-purple mb-2">JASWANTH'S QUEST</h1>
+            <p className="text-gray-300 text-xs sm:text-sm md:text-base">A Full-Stack Developer's Arcade Adventure</p>
           </header>
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-            <div className="lg:col-span-12 bg-arcade-darker p-1 rounded-lg border-4 border-arcade-purple relative overflow-hidden crt">
-              <div className="bg-arcade-dark p-6 min-h-[500px] relative">
+          <div className="grid grid-cols-1 gap-4 md:gap-6 mb-4 md:mb-6">
+            <div className="bg-arcade-darker p-1 rounded-lg border-2 md:border-4 border-arcade-purple relative overflow-hidden crt">
+              <div className="bg-arcade-dark p-3 md:p-6 min-h-[300px] md:min-h-[500px] relative">
                 <AvatarCharacter onGuide={handleAvatarGuide} />
                 
-                <div className="mb-6 flex justify-between items-center">
-                  <h2 className="text-xl font-pixel text-arcade-purple">
+                <div className="mb-3 md:mb-6 flex justify-between items-center">
+                  <h2 className="text-lg md:text-xl font-pixel text-arcade-purple">
                     {activeSection.toUpperCase()} MISSION
                   </h2>
                   
-                  <div className="flex items-center gap-2 px-3 py-1 bg-arcade-darker rounded-lg">
+                  <div className="flex items-center gap-2 px-2 py-1 bg-arcade-darker rounded-lg">
                     <span className="w-2 h-2 rounded-full bg-arcade-green animate-blink"></span>
-                    <span className="text-xs text-arcade-green font-pixel">SYSTEM ONLINE</span>
+                    <span className="text-xxs md:text-xs text-arcade-green font-pixel">SYSTEM ONLINE</span>
                   </div>
                 </div>
                 
@@ -122,16 +125,16 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <ArcadeControls 
               onControlClick={handleControlClick}
               activeSection={activeSection}
             />
             
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-2 md:mt-4">
               <ArcadeButton 
                 color="orange" 
-                className="px-6"
+                className="px-3 md:px-6 text-xs md:text-sm"
                 onClick={() => setActiveSection('game')}
               >
                 PLAY SNAKE GAME
@@ -139,9 +142,9 @@ const Index = () => {
             </div>
           </div>
           
-          <footer className="text-center text-gray-400 text-sm">
+          <footer className="text-center text-gray-400 text-xs md:text-sm">
             <p>© 2025 JASWANTH'S QUEST. All rights reserved.</p>
-            <p className="mt-1 text-xs">Use arrow keys or arcade controls to navigate</p>
+            <p className="mt-1 text-xxs md:text-xs">Use arrow keys or arcade controls to navigate</p>
           </footer>
         </div>
       </div>
