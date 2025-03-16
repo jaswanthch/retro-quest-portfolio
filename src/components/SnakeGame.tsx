@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
@@ -287,7 +286,7 @@ const SnakeGame: React.FC = () => {
       newSnake.some(segment => segment.x === head.x && segment.y === head.y)
     ) {
       setGameOver(true);
-      playSound('error');
+      playSound('gameover');
       if (gameLoopRef.current) {
         clearTimeout(gameLoopRef.current);
       }
@@ -732,4 +731,3 @@ const SnakeGame: React.FC = () => {
 };
 
 export default SnakeGame;
-

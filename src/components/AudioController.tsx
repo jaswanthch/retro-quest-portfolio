@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useContext, createContext } from "react";
 import { Volume2, VolumeX, Volume1 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -7,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 interface AudioContextType {
   isMuted: boolean;
   setIsMuted: React.Dispatch<React.SetStateAction<boolean>>;
-  playSound: (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error') => void;
+  playSound: (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error' | 'gameover') => void;
   isGameActive: boolean;
   setIsGameActive: React.Dispatch<React.SetStateAction<boolean>>;
   volume: number;
@@ -23,7 +22,8 @@ const AUDIO_URLS = {
   hover: "/audio/hover.mp3",
   collect: "/audio/collect.mp3",
   success: "/audio/success.mp3",
-  error: "/audio/error.mp3"
+  error: "/audio/error.mp3",
+  gameover: "/audio/error.mp3" // Using error.mp3 as placeholder for gameover
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -54,7 +54,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [isGameActive, isMuted, volume]);
   
-  const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error') => {
+  const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error' | 'gameover') => {
     if (isMuted) return;
     
     const sound = new Audio(AUDIO_URLS[soundType]);
