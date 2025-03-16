@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
@@ -62,11 +61,17 @@ const SnakeGame: React.FC = () => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [collectedSkill, setCollectedSkill] = useState<{name: string, description: string} | null>(null);
   const [showPopups, setShowPopups] = useState<boolean>(true);
-  const { playSound } = useArcadeSound();
+  const { playSound, setIsGameActive } = useArcadeSound();
   
   const gameLoopRef = useRef<number | null>(null);
   const directionQueueRef = useRef<string[]>([]);
   const gameContainerRef = useRef<HTMLDivElement>(null);
+
+  // Set the game active state when component mounts or unmounts
+  useEffect(() => {
+    setIsGameActive(true);
+    return () => setIsGameActive(false);
+  }, [setIsGameActive]);
 
   // Pause game when dialog opens
   useEffect(() => {

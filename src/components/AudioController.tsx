@@ -1,5 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+
+import React, { useState, useEffect, useRef, useContext, createContext } from "react";
 import { Volume2, VolumeX } from "lucide-react";
+
+// Create context for audio controls
+interface AudioContextType {
+  isMuted: boolean;
+  setIsMuted: React.Dispatch<React.SetStateAction<boolean>>;
+  playSound: (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error') => void;
+  isGameActive: boolean;
+  setIsGameActive: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 // Sound URLs from public folder
 const AUDIO_URLS = {
@@ -11,14 +23,71 @@ const AUDIO_URLS = {
   error: "/audio/error.mp3"
 };
 
-const AudioController = () => {
+export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMuted, setIsMuted] = useState(true);
+  const [isGameActive, setIsGameActive] = useState(false);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   
   useEffect(() => {
     bgmRef.current = new Audio(AUDIO_URLS.bgm);
     bgmRef.current.loop = true;
-    bgmRef.current.volume = 0.5;
+    bgmRef.current.volume = 0.2; // Default 20% volume
+    
+    return () => {
+      if (bgmRef.current) {
+        bgmRef.current.pause();
+        bgmRef.current = null;
+      }
+    };
+  }, []);
+  
+  // Handle volume changes when game state changes
+  useEffect(() => {
+    if (bgmRef.current && !isMuted) {
+      bgmRef.current.volume = isGameActive ? 0.05 : 0.2; // Reduce to 5% during game
+    }
+  }, [isGameActive, isMuted]);
+  
+  const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error') => {
+    if (isMuted) return;
+    
+    const sound = new Audio(AUDIO_URLS[soundType]);
+    sound.volume = 0.3;
+    sound.play().catch(e => console.error("Sound effect play failed:", e));
+  };
+  
+  const contextValue: AudioContextType = {
+    isMuted,
+    setIsMuted,
+    playSound,
+    isGameActive,
+    setIsGameActive
+  };
+  
+  return (
+    <AudioContext.Provider value={contextValue}>
+      {children}
+    </AudioContext.Provider>
+  );
+};
+
+// Hook for components to access audio functionality
+export const useArcadeSound = () => {
+  const context = useContext(AudioContext);
+  if (context === undefined) {
+    throw new Error('useArcadeSound must be used within an AudioProvider');
+  }
+  return context;
+};
+
+const AudioController = () => {
+  const { isMuted, setIsMuted } = useArcadeSound();
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+  
+  useEffect(() => {
+    bgmRef.current = new Audio(AUDIO_URLS.bgm);
+    bgmRef.current.loop = true;
+    bgmRef.current.volume = 0.2; // 20% volume
     
     return () => {
       if (bgmRef.current) {
@@ -38,14 +107,6 @@ const AudioController = () => {
     }
     setIsMuted(!isMuted);
   };
-  
-  const playSound = (soundUrl: string) => {
-    if (!isMuted) {
-      const sound = new Audio(soundUrl);
-      sound.volume = 0.5;
-      sound.play().catch(e => console.error("Sound effect play failed:", e));
-    }
-  };
 
   return (
     <div className="fixed top-4 right-4 z-50">
@@ -58,21 +119,6 @@ const AudioController = () => {
       </button>
     </div>
   );
-};
-
-// Export a function to play sounds that can be used throughout the app
-export const useArcadeSound = () => {
-  const [isMuted, setIsMuted] = useState(false);
-  
-  const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error') => {
-    if (isMuted) return;
-    
-    const sound = new Audio(AUDIO_URLS[soundType]);
-    sound.volume = 0.3;
-    sound.play().catch(e => console.error("Sound effect play failed:", e));
-  };
-  
-  return { playSound, isMuted, setIsMuted };
 };
 
 export default AudioController;
