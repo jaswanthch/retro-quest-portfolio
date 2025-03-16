@@ -1,15 +1,14 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
 // Sound URLs from public folder
 const AUDIO_URLS = {
   bgm: "/audio/bgm.mp3",
-  click: "/audio/click.wav",
-  hover: "/audio/hover.wav",
-  collect: "/audio/collect.wav",
-  success: "/audio/success.wav",
-  error: "/audio/error.wav"
+  click: "/audio/click.mp3",
+  hover: "/audio/hover.mp3",
+  collect: "/audio/collect.mp3",
+  success: "/audio/success.mp3",
+  error: "/audio/error.mp3"
 };
 
 const AudioController = () => {
