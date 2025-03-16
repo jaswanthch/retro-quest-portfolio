@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
@@ -103,7 +102,6 @@ const SnakeGame: React.FC = () => {
     const savedSkills = JSON.parse(localStorage.getItem('collectedSkills') || '[]');
     setCapturedSkills(savedSkills);
     
-    // Check if all skills are captured
     if (savedSkills.length >= skills.length) {
       setAllSkillsCaptured(true);
     }
@@ -149,6 +147,26 @@ const SnakeGame: React.FC = () => {
     
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    
+    const resizeCanvas = () => {
+      const container = canvas.parentElement;
+      if (container) {
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        
+        const size = Math.min(containerWidth, containerHeight);
+        
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        
+        canvas.width = GRID_SIZE * CELL_SIZE;
+        canvas.height = GRID_SIZE * CELL_SIZE;
+      }
+    };
+    
+    resizeCanvas();
+    
+    window.addEventListener('resize', resizeCanvas);
     
     const drawGame = () => {
       ctx.fillStyle = '#1A1F2C';
@@ -258,7 +276,6 @@ const SnakeGame: React.FC = () => {
             setOpenDialog(true);
           }
           
-          // Only show the "all skills captured" dialog the first time all skills are collected
           if (newCapturedSkills.length >= skills.length && !allSkillsCaptured) {
             setAllSkillsCaptured(true);
             setShowAllSkillsDialog(true);
@@ -392,9 +409,7 @@ const SnakeGame: React.FC = () => {
 
   return (
     <div className="relative w-full max-w-5xl mx-auto">
-      {/* Arcade Cabinet Frame */}
       <div className="bg-[#221F26] rounded-t-3xl shadow-2xl border-b-0 pt-8 px-8 pb-0 border-4 border-[#403E43] relative overflow-hidden">
-        {/* Cabinet Top Edge with Speakers */}
         <div className="absolute top-0 left-0 right-0 h-8 bg-[#0F1218] flex justify-between items-center px-6 border-b-4 border-[#403E43]">
           <div className="flex items-center gap-1">
             <Speaker size={16} className="text-gray-400" />
@@ -422,15 +437,14 @@ const SnakeGame: React.FC = () => {
         </div>
         
         <div className="flex flex-col lg:flex-row gap-6 relative">
-          {/* Game Screen with CRT Effect */}
           <div className="flex-1 relative">
             <div className="absolute -inset-1 bg-gradient-to-br from-arcade-pink/20 via-arcade-purple/20 to-arcade-blue/20 blur"></div>
-            <div className="bg-black rounded-sm relative overflow-hidden crt">
+            <div className="bg-black rounded-sm relative overflow-hidden crt flex items-center justify-center min-h-[400px]">
               <canvas 
                 ref={canvasRef} 
                 width={GRID_SIZE * CELL_SIZE} 
                 height={GRID_SIZE * CELL_SIZE}
-                className="border-4 border-[#221F26] rounded-sm"
+                className="border-4 border-[#221F26] rounded-sm object-contain max-w-full max-h-full"
               />
               {gameOver && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
@@ -448,7 +462,6 @@ const SnakeGame: React.FC = () => {
               )}
             </div>
             
-            {/* Game Controls Info */}
             <div className="mt-4 flex flex-col sm:flex-row justify-between gap-2">
               <div className="text-arcade-green font-pixel text-xs">
                 Arrow keys to control
@@ -459,7 +472,6 @@ const SnakeGame: React.FC = () => {
             </div>
           </div>
           
-          {/* Skill Collection Panel - Enlarged */}
           <div className="w-full lg:w-[280px] relative">
             <div className="absolute -inset-1 bg-gradient-to-br from-arcade-green/20 via-arcade-blue/20 to-arcade-orange/20 blur"></div>
             <Card className="bg-arcade-dark border-2 border-arcade-purple text-white h-full relative overflow-hidden">
@@ -521,7 +533,6 @@ const SnakeGame: React.FC = () => {
           </div>
         </div>
         
-        {/* Control Panel */}
         <div className="bg-[#1A1F2C] mt-6 p-5 border-t-4 border-[#403E43] rounded-b-lg shadow-inner flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <button
@@ -555,10 +566,8 @@ const SnakeGame: React.FC = () => {
         </div>
       </div>
       
-      {/* Arcade Machine Bottom */}
       <div className="bg-[#1A1F2C] h-8 mx-auto border-4 border-[#403E43] border-t-0 rounded-b-3xl max-w-5xl"></div>
       
-      {/* Dialog for collected skills */}
       <Dialog open={openDialog} onOpenChange={handleCloseDialog}>
         <DialogContent className="bg-arcade-darker border-2 border-arcade-purple">
           <DialogHeader>
