@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useRef, useContext, createContext } from "react";
-import { Volume2, VolumeX, Volume1 } from "lucide-react";
+import { Volume2, VolumeX, Volume1, Settings } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 // Create context for audio controls
 interface AudioContextType {
@@ -91,7 +93,6 @@ export const useArcadeSound = () => {
 const AudioController = () => {
   const { isMuted, setIsMuted, volume, setVolume } = useArcadeSound();
   const bgmRef = useRef<HTMLAudioElement | null>(null);
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   
   useEffect(() => {
     bgmRef.current = new Audio(AUDIO_URLS.bgm);
@@ -128,34 +129,40 @@ const AudioController = () => {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
-      <div 
-        className="relative"
-        onMouseEnter={() => setShowVolumeSlider(true)}
-        onMouseLeave={() => setShowVolumeSlider(false)}
+    <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+      {/* Mute/Unmute Button */}
+      <button 
+        onClick={toggleMute}
+        className="bg-arcade-purple rounded-full p-2 text-white hover:bg-opacity-80 transition-all"
+        aria-label={isMuted ? "Unmute" : "Mute"}
       >
-        <button 
-          onClick={toggleMute}
-          className="bg-arcade-purple rounded-full p-2 text-white hover:bg-opacity-80 transition-all"
-          aria-label={isMuted ? "Unmute" : "Mute"}
-        >
-          {getVolumeIcon()}
-        </button>
-        
-        {showVolumeSlider && (
-          <div className="absolute right-0 mt-2 p-4 bg-arcade-darker border border-arcade-purple rounded-lg shadow-lg min-w-32">
+        {getVolumeIcon()}
+      </button>
+      
+      {/* Volume Settings Button with Popover */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button 
+            className="bg-arcade-purple rounded-full p-2 text-white hover:bg-opacity-80 transition-all"
+            aria-label="Volume Settings"
+          >
+            <Settings size={20} />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64 p-4 bg-arcade-darker border border-arcade-purple rounded-lg shadow-lg">
+          <div className="space-y-4">
+            <h4 className="text-white font-medium text-sm">Volume Control</h4>
             <Slider 
               value={[volume]}
               min={0}
               max={100}
               step={1}
               onValueChange={handleVolumeChange}
-              className="w-full"
             />
-            <p className="text-white text-xs mt-2 text-center">{volume}%</p>
+            <p className="text-white text-xs text-center">{volume}%</p>
           </div>
-        )}
-      </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
