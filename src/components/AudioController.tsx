@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef, useContext, createContext } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, Volume1 } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 // Create context for audio controls
 interface AudioContextType {
@@ -9,6 +10,8 @@ interface AudioContextType {
   playSound: (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error') => void;
   isGameActive: boolean;
   setIsGameActive: React.Dispatch<React.SetStateAction<boolean>>;
+  volume: number;
+  setVolume: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -26,12 +29,13 @@ const AUDIO_URLS = {
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMuted, setIsMuted] = useState(true);
   const [isGameActive, setIsGameActive] = useState(false);
+  const [volume, setVolume] = useState(50); // Volume as percentage (0-100)
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   
   useEffect(() => {
     bgmRef.current = new Audio(AUDIO_URLS.bgm);
     bgmRef.current.loop = true;
-    bgmRef.current.volume = 0.2; // Default 20% volume
+    bgmRef.current.volume = (volume / 100) * 0.5; // Scale to max of 0.5 volume
     
     return () => {
       if (bgmRef.current) {
@@ -41,18 +45,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
   
-  // Handle volume changes when game state changes
+  // Handle volume changes when game state or volume changes
   useEffect(() => {
     if (bgmRef.current && !isMuted) {
-      bgmRef.current.volume = isGameActive ? 0.05 : 0.2; // Reduce to 5% during game
+      // During game, reduce volume further
+      const baseVolume = volume / 100;
+      bgmRef.current.volume = isGameActive ? baseVolume * 0.25 : baseVolume * 0.5;
     }
-  }, [isGameActive, isMuted]);
+  }, [isGameActive, isMuted, volume]);
   
   const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error') => {
     if (isMuted) return;
     
     const sound = new Audio(AUDIO_URLS[soundType]);
-    sound.volume = 0.3;
+    sound.volume = (volume / 100) * 0.6; // Scale effect volume
     sound.play().catch(e => console.error("Sound effect play failed:", e));
   };
   
@@ -61,7 +67,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsMuted,
     playSound,
     isGameActive,
-    setIsGameActive
+    setIsGameActive,
+    volume,
+    setVolume
   };
   
   return (
@@ -81,13 +89,14 @@ export const useArcadeSound = () => {
 };
 
 const AudioController = () => {
-  const { isMuted, setIsMuted } = useArcadeSound();
+  const { isMuted, setIsMuted, volume, setVolume } = useArcadeSound();
   const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   
   useEffect(() => {
     bgmRef.current = new Audio(AUDIO_URLS.bgm);
     bgmRef.current.loop = true;
-    bgmRef.current.volume = 0.2; // 20% volume
+    bgmRef.current.volume = (volume / 100) * 0.5; // 50% max volume
     
     return () => {
       if (bgmRef.current) {
@@ -95,7 +104,7 @@ const AudioController = () => {
         bgmRef.current = null;
       }
     };
-  }, []);
+  }, [volume]);
   
   const toggleMute = () => {
     if (bgmRef.current) {
@@ -108,15 +117,45 @@ const AudioController = () => {
     setIsMuted(!isMuted);
   };
 
+  const handleVolumeChange = (value: number[]) => {
+    setVolume(value[0]);
+  };
+
+  const getVolumeIcon = () => {
+    if (isMuted) return <VolumeX size={20} />;
+    if (volume < 30) return <Volume1 size={20} />;
+    return <Volume2 size={20} />;
+  };
+
   return (
     <div className="fixed top-4 right-4 z-50">
-      <button 
-        onClick={toggleMute}
-        className="bg-arcade-purple rounded-full p-2 text-white hover:bg-opacity-80 transition-all"
-        aria-label={isMuted ? "Unmute" : "Mute"}
+      <div 
+        className="relative"
+        onMouseEnter={() => setShowVolumeSlider(true)}
+        onMouseLeave={() => setShowVolumeSlider(false)}
       >
-        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-      </button>
+        <button 
+          onClick={toggleMute}
+          className="bg-arcade-purple rounded-full p-2 text-white hover:bg-opacity-80 transition-all"
+          aria-label={isMuted ? "Unmute" : "Mute"}
+        >
+          {getVolumeIcon()}
+        </button>
+        
+        {showVolumeSlider && (
+          <div className="absolute right-0 mt-2 p-4 bg-arcade-darker border border-arcade-purple rounded-lg shadow-lg min-w-32">
+            <Slider 
+              value={[volume]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handleVolumeChange}
+              className="w-full"
+            />
+            <p className="text-white text-xs mt-2 text-center">{volume}%</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
