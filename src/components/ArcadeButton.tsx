@@ -9,6 +9,7 @@ interface ArcadeButtonProps {
   onClick?: () => void;
   className?: string;
   disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 const ArcadeButton: React.FC<ArcadeButtonProps> = ({
@@ -16,7 +17,8 @@ const ArcadeButton: React.FC<ArcadeButtonProps> = ({
   color = 'purple',
   onClick,
   className,
-  disabled = false
+  disabled = false,
+  type = 'button'
 }) => {
   const { playSound } = useArcadeSound();
   
@@ -53,6 +55,7 @@ const ArcadeButton: React.FC<ArcadeButtonProps> = ({
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       disabled={disabled}
+      type={type}
     >
       {children}
     </button>
