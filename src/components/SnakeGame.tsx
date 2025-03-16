@@ -66,6 +66,7 @@ const SnakeGame: React.FC = () => {
   
   const gameLoopRef = useRef<number | null>(null);
   const directionQueueRef = useRef<string[]>([]);
+  const gameContainerRef = useRef<HTMLDivElement>(null);
 
   // Pause game when dialog opens
   useEffect(() => {
@@ -80,6 +81,23 @@ const SnakeGame: React.FC = () => {
     if (popupSetting !== null) {
       setShowPopups(popupSetting === 'true');
     }
+  }, []);
+
+  // Prevent page scrolling with arrow keys
+  useEffect(() => {
+    const preventArrowScroll = (e: KeyboardEvent) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+      }
+    };
+
+    // Add the event listener to prevent default behavior for arrow keys
+    window.addEventListener('keydown', preventArrowScroll);
+
+    // Clean up
+    return () => {
+      window.removeEventListener('keydown', preventArrowScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -301,7 +319,11 @@ const SnakeGame: React.FC = () => {
   };
 
   return (
-    <div className="bg-arcade-darker p-6 rounded-lg pixel-corners border-2 border-arcade-purple flex flex-col items-center relative">
+    <div 
+      ref={gameContainerRef}
+      className="bg-arcade-darker p-6 rounded-lg pixel-corners border-2 border-arcade-purple flex flex-col items-center relative"
+      tabIndex={0} // Make the container focusable
+    >
       <h2 className="text-xl text-white mb-4 font-pixel self-start">SKILL SNAKE GAME</h2>
       
       <canvas 
