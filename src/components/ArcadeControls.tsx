@@ -66,18 +66,18 @@ const ArcadeControls: React.FC<ArcadeControlsProps> = ({ onControlClick, activeS
         
         <div className="flex flex-col items-center">
           <ArcadeButton 
-            color={activeSection === 'game' ? 'green' : 'blue'}
+            color={activeSection === 'game' ? 'green' : 'orange'}
             onClick={() => handleButtonClick('game')}
             className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
           >
             <Gamepad2 size={24} />
           </ArcadeButton>
-          <span className="text-xs font-pixel text-gray-300">GAME</span>
+          <span className="text-xs font-pixel text-gray-300">SNAKE GAME</span>
         </div>
         
         <div className="flex flex-col items-center">
           <ArcadeButton 
-            color="orange"
+            color="red"
             onClick={() => handleButtonClick('start')}
             className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
           >

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import ArcadeControls from '@/components/ArcadeControls';
 import ArcadeButton from '@/components/ArcadeButton';
@@ -153,16 +154,6 @@ const Index = () => {
               onControlClick={handleControlClick}
               activeSection={activeSection}
             />
-            
-            <div className="flex justify-center mt-2 md:mt-4">
-              <ArcadeButton 
-                color="orange" 
-                className="px-3 md:px-6 text-xs md:text-sm"
-                onClick={() => setActiveSection('game')}
-              >
-                PLAY SNAKE GAME
-              </ArcadeButton>
-            </div>
           </div>
           
           <footer className="text-center text-gray-400 text-xs md:text-sm">
