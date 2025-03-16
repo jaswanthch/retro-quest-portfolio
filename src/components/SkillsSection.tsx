@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import SkillToken from './SkillToken';
 import { Code, Database, Globe, Server, Terminal, Zap, Layout, FileCode, Gamepad } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 
 const SkillsSection: React.FC = () => {
   const [collectedSkills, setCollectedSkills] = useState<string[]>([]);
@@ -103,6 +101,16 @@ const SkillsSection: React.FC = () => {
     setSelectedSkill(skill);
   };
 
+  const navigateToGame = () => {
+    // Using the parent component's onControlClick handler defined in Index.tsx
+    if (window.location.pathname === '/') {
+      const event = new CustomEvent('navigateToSection', { 
+        detail: { section: 'game' } 
+      });
+      window.dispatchEvent(event);
+    }
+  };
+
   return (
     <div className="bg-arcade-darker p-6 rounded-lg pixel-corners border-2 border-arcade-purple min-h-[400px] relative">
       <h2 className="text-xl text-white mb-4 font-pixel">SKILL TOKENS</h2>
@@ -180,14 +188,11 @@ const SkillsSection: React.FC = () => {
       
       <div className="flex justify-center mb-6">
         <Button
-          onClick={() => {}} 
-          asChild
+          onClick={navigateToGame} 
           className="bg-arcade-orange hover:bg-arcade-orange/80 text-white font-pixel flex items-center gap-2"
         >
-          <Link to="?section=game">
-            <Gamepad size={18} />
-            PLAY SNAKE GAME TO COLLECT SKILLS
-          </Link>
+          <Gamepad size={18} />
+          PLAY SNAKE GAME TO COLLECT SKILLS
         </Button>
       </div>
       

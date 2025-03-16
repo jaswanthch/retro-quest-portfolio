@@ -42,6 +42,28 @@ const Index = () => {
     return () => clearInterval(loadingInterval);
   }, []);
   
+  useEffect(() => {
+    // Listen for the custom event from SkillsSection
+    const handleNavigateEvent = (event: CustomEvent) => {
+      if (event.detail && event.detail.section) {
+        setActiveSection(event.detail.section);
+      }
+    };
+    
+    window.addEventListener('navigateToSection', handleNavigateEvent as EventListener);
+    
+    // Check URL parameters on mount
+    const params = new URLSearchParams(window.location.search);
+    const sectionParam = params.get('section');
+    if (sectionParam) {
+      setActiveSection(sectionParam);
+    }
+    
+    return () => {
+      window.removeEventListener('navigateToSection', handleNavigateEvent as EventListener);
+    };
+  }, []);
+  
   const handleControlClick = (section: string) => {
     if (section === 'start') {
       localStorage.removeItem('collectedSkills');
@@ -50,11 +72,16 @@ const Index = () => {
     }
     
     setActiveSection(section);
+    
+    // Update URL without reloading the page
+    const url = new URL(window.location.href);
+    url.searchParams.set('section', section);
+    window.history.pushState({}, '', url);
   };
   
   const handleAvatarGuide = (section: string) => {
     if (section) {
-      setActiveSection(section);
+      handleControlClick(section);
     }
   };
   
