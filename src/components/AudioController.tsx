@@ -29,13 +29,32 @@ const AUDIO_URLS = {
   powerup: "/audio/success.mp3"  // Using success.mp3 as placeholder for powerup
 };
 
+// Preload audio to prevent first-play delay
+const soundCache: Record<string, HTMLAudioElement> = {};
+
+const preloadAudio = () => {
+  // Create and preload all sound effects
+  Object.entries(AUDIO_URLS).forEach(([key, url]) => {
+    if (key !== 'bgm') { // Skip bgm as it's handled separately
+      const audio = new Audio(url);
+      // Force browser to load the audio file
+      audio.preload = 'auto';
+      audio.load();
+      soundCache[key] = audio;
+    }
+  });
+  console.log('Audio files preloaded');
+};
+
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMuted, setIsMuted] = useState(true);
   const [isGameActive, setIsGameActive] = useState(false);
   const [volume, setVolume] = useState(50); // Volume as percentage (0-100)
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   
+  // Preload audio on mount
   useEffect(() => {
+    preloadAudio();
     bgmRef.current = new Audio(AUDIO_URLS.bgm);
     bgmRef.current.loop = true;
     bgmRef.current.volume = (volume / 100) * 0.5; // Scale to max of 0.5 volume
@@ -70,9 +89,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const playSound = (soundType: 'click' | 'hover' | 'collect' | 'success' | 'error' | 'gameover' | 'powerup') => {
     if (isMuted) return;
     
-    const sound = new Audio(AUDIO_URLS[soundType]);
-    sound.volume = (volume / 100) * 0.6; // Scale effect volume
-    sound.play().catch(e => console.error("Sound effect play failed:", e));
+    // Use the cached audio and clone it for simultaneous sounds
+    if (soundCache[soundType]) {
+      // Clone the audio to allow multiple sounds to play simultaneously
+      const sound = soundCache[soundType].cloneNode() as HTMLAudioElement;
+      sound.volume = (volume / 100) * 0.6; // Scale effect volume
+      sound.play().catch(e => console.error("Sound effect play failed:", e));
+    } else {
+      console.warn(`Sound ${soundType} not found in cache`);
+    }
   };
   
   const contextValue: AudioContextType = {
