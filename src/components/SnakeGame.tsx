@@ -1,13 +1,15 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pause, Play, RefreshCw, ArrowRight, Check, XCircle, Joystick, Speaker } from 'lucide-react';
+import { Pause, Play, RefreshCw, ArrowRight, Check, XCircle, Joystick, Speaker, GamepadIcon } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import ArcadeButton from './ArcadeButton';
 
 type Position = {
   x: number;
@@ -93,6 +95,7 @@ const SnakeGame: React.FC = () => {
   const [collectedSkill, setCollectedSkill] = useState<{name: string, description: string} | null>(null);
   const [showPopups, setShowPopups] = useState<boolean>(true);
   const [itemsCollected, setItemsCollected] = useState<number>(0);
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
   const { playSound, setIsGameActive } = useArcadeSound();
   
   const gameLoopRef = useRef<number | null>(null);
@@ -194,6 +197,17 @@ const SnakeGame: React.FC = () => {
       ctx.fillStyle = '#1A1F2C';
       ctx.fillRect(0, 0, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE);
       
+      if (!gameStarted) {
+        ctx.fillStyle = 'white';
+        ctx.font = '20px pixel, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('SKILL SNAKE', GRID_SIZE * CELL_SIZE / 2, GRID_SIZE * CELL_SIZE / 2 - 20);
+        ctx.font = '12px pixel, monospace';
+        ctx.fillText('Press START to begin', GRID_SIZE * CELL_SIZE / 2, GRID_SIZE * CELL_SIZE / 2 + 20);
+        ctx.textAlign = 'start';
+        return;
+      }
+      
       if (food.isSkill) {
         ctx.fillStyle = '#8B5CF6';
         ctx.fillRect(food.position.x * CELL_SIZE, food.position.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -235,10 +249,10 @@ const SnakeGame: React.FC = () => {
     };
     
     drawGame();
-  }, [snake, food, score, paused, itemsCollected]);
+  }, [snake, food, score, paused, itemsCollected, gameStarted]);
   
   const moveSnake = () => {
-    if (gameOver || paused) return;
+    if (gameOver || paused || !gameStarted) return;
     
     if (directionQueueRef.current.length > 0) {
       const nextDirection = directionQueueRef.current.shift();
@@ -331,6 +345,13 @@ const SnakeGame: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameOver) return;
       
+      if (!gameStarted) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          startGame();
+          return;
+        }
+      }
+      
       switch (e.key) {
         case 'ArrowUp':
           if (direction !== 'down') {
@@ -353,7 +374,9 @@ const SnakeGame: React.FC = () => {
           }
           break;
         case ' ':
-          setPaused(prev => !prev);
+          if (gameStarted) {
+            setPaused(prev => !prev);
+          }
           break;
         case 'r':
           if (gameOver) {
@@ -370,10 +393,10 @@ const SnakeGame: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [direction, gameOver]);
+  }, [direction, gameOver, gameStarted]);
   
   useEffect(() => {
-    if (!gameOver && !paused) {
+    if (!gameOver && !paused && gameStarted) {
       gameLoopRef.current = window.setTimeout(moveSnake, speed);
     }
     
@@ -382,7 +405,12 @@ const SnakeGame: React.FC = () => {
         clearTimeout(gameLoopRef.current);
       }
     };
-  }, [snake, gameOver, paused, speed]);
+  }, [snake, gameOver, paused, speed, gameStarted]);
+  
+  const startGame = () => {
+    setGameStarted(true);
+    playSound('click');
+  };
   
   const resetGame = () => {
     setSnake([
@@ -398,6 +426,7 @@ const SnakeGame: React.FC = () => {
     setSpeed(INITIAL_SPEED);
     setItemsCollected(0);
     setShowAllSkillsDialog(false);
+    setGameStarted(true);
     directionQueueRef.current = [];
     playSound('click');
   };
@@ -468,6 +497,31 @@ const SnakeGame: React.FC = () => {
                 height={GRID_SIZE * CELL_SIZE}
                 className="border-4 border-[#221F26] rounded-sm object-contain max-w-full max-h-full"
               />
+              
+              {!gameStarted && !gameOver && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
+                  <div className="bg-arcade-darker p-6 rounded-lg border-2 border-arcade-purple text-center max-w-xs">
+                    <h3 className="text-xl text-arcade-green font-pixel mb-4">SKILL SNAKE</h3>
+                    <div className="mb-6">
+                      <p className="text-white text-sm mb-2">Collect items and skills in this classic arcade game.</p>
+                      <ul className="text-xs text-left text-gray-300 space-y-1 mb-4">
+                        <li>• Use arrow keys to move</li>
+                        <li>• Collect {ITEMS_BEFORE_SKILL} regular items to spawn a skill</li>
+                        <li>• Capture all skills to win</li>
+                      </ul>
+                    </div>
+                    <ArcadeButton 
+                      onClick={startGame}
+                      color="green" 
+                      className="w-full justify-center"
+                    >
+                      <GamepadIcon size={16} />
+                      START GAME
+                    </ArcadeButton>
+                  </div>
+                </div>
+              )}
+              
               {gameOver && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
                   <div className="bg-arcade-darker p-6 rounded-lg border-2 border-arcade-purple text-center">
@@ -559,21 +613,34 @@ const SnakeGame: React.FC = () => {
         
         <div className="bg-[#1A1F2C] mt-6 p-5 border-t-4 border-[#403E43] rounded-b-lg shadow-inner flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setPaused(!paused)}
-              className="bg-arcade-purple text-white px-4 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2 shadow-lg"
-            >
-              {paused ? <Play size={16} /> : <Pause size={16} />}
-              {paused ? 'RESUME' : 'PAUSE'}
-            </button>
-            
-            <button
-              onClick={resetGame}
-              className="bg-arcade-orange text-white px-4 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2 shadow-lg"
-            >
-              <RefreshCw size={16} />
-              RESTART
-            </button>
+            {gameStarted ? (
+              <>
+                <button
+                  onClick={() => setPaused(!paused)}
+                  className="bg-arcade-purple text-white px-4 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2 shadow-lg"
+                  disabled={!gameStarted || gameOver}
+                >
+                  {paused ? <Play size={16} /> : <Pause size={16} />}
+                  {paused ? 'RESUME' : 'PAUSE'}
+                </button>
+                
+                <button
+                  onClick={resetGame}
+                  className="bg-arcade-orange text-white px-4 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2 shadow-lg"
+                >
+                  <RefreshCw size={16} />
+                  RESTART
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={startGame}
+                className="bg-arcade-green text-white px-6 py-2 rounded-lg font-pixel hover:bg-opacity-80 flex items-center gap-2 shadow-lg"
+              >
+                <GamepadIcon size={16} />
+                START GAME
+              </button>
+            )}
           </div>
           
           <div className="flex items-center space-x-2 text-sm">
