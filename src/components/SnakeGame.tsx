@@ -1,10 +1,12 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pause, Play, RefreshCw, ArrowRight } from 'lucide-react';
+import { Pause, Play, RefreshCw, ArrowRight, Check, XCircle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 type Position = {
   x: number;
@@ -23,8 +25,8 @@ interface SkillFood {
 const GRID_SIZE = 20;
 const CELL_SIZE = 20;
 const INITIAL_SPEED = 150;
-const SPEED_INCREASE = 1.1; // Changed from 1.2 to 1.1 as requested
-const ITEMS_BEFORE_SKILL = 3; // Number of normal items before a skill appears
+const SPEED_INCREASE = 1.1;
+const ITEMS_BEFORE_SKILL = 3;
 
 const skills = [
   { name: 'JavaScript', description: 'A programming language for the web.' },
@@ -45,15 +47,12 @@ const getRandomPosition = (): Position => ({
 });
 
 const getRandomSkill = (capturedSkills: string[]): SkillFood['skill'] => {
-  // Filter out already captured skills
   const availableSkills = skills.filter(skill => !capturedSkills.includes(skill.name));
   
-  // If there are still uncaptured skills, prioritize them
   if (availableSkills.length > 0) {
     return availableSkills[Math.floor(Math.random() * availableSkills.length)];
   }
   
-  // If all skills are captured, show any random skill
   return skills[Math.floor(Math.random() * skills.length)];
 };
 
@@ -240,17 +239,14 @@ const SnakeGame: React.FC = () => {
       setScore(prevScore => prevScore + (food.isSkill ? 5 : 1));
       
       if (food.isSkill && food.skill) {
-        // Update captured skills
         const newCapturedSkills = [...capturedSkills];
         
-        // Only add the skill if it's not already captured
         if (!newCapturedSkills.includes(food.skill.name)) {
           newCapturedSkills.push(food.skill.name);
           setCapturedSkills(newCapturedSkills);
           localStorage.setItem('collectedSkills', JSON.stringify(newCapturedSkills));
         }
         
-        // Show the skill popup if enabled
         if (showPopups) {
           setCollectedSkill(food.skill);
           setOpenDialog(true);
@@ -259,13 +255,11 @@ const SnakeGame: React.FC = () => {
         playSound('success');
         setItemsCollected(0);
         
-        // Check if all skills are captured
         if (newCapturedSkills.length >= skills.length) {
           setAllSkillsCaptured(true);
           return;
         }
         
-        // Generate new food
         setFood(generateFood(false, newCapturedSkills));
         setSpeed(prevSpeed => prevSpeed / SPEED_INCREASE);
       } else {
@@ -395,12 +389,63 @@ const SnakeGame: React.FC = () => {
     >
       <h2 className="text-xl text-white mb-4 font-pixel self-start">SKILL SNAKE GAME</h2>
       
-      <canvas 
-        ref={canvasRef} 
-        width={GRID_SIZE * CELL_SIZE} 
-        height={GRID_SIZE * CELL_SIZE}
-        className="border-2 border-arcade-purple mb-4"
-      />
+      <div className="flex flex-col md:flex-row w-full gap-4 mb-4">
+        <div className="flex-1">
+          <canvas 
+            ref={canvasRef} 
+            width={GRID_SIZE * CELL_SIZE} 
+            height={GRID_SIZE * CELL_SIZE}
+            className="border-2 border-arcade-purple"
+          />
+        </div>
+        
+        <div className="flex-none w-full md:w-[200px]">
+          <Card className="bg-arcade-dark border-arcade-purple text-white h-full">
+            <CardHeader className="px-3 py-2">
+              <CardTitle className="text-arcade-green font-pixel text-sm">COLLECTED SKILLS</CardTitle>
+            </CardHeader>
+            <Separator className="bg-arcade-purple/30" />
+            <CardContent className="p-3 overflow-y-auto max-h-[300px]">
+              {skills.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {skills.map((skill) => {
+                    const isCollected = capturedSkills.includes(skill.name);
+                    return (
+                      <div 
+                        key={skill.name} 
+                        className={`flex items-center gap-2 p-1.5 rounded-md ${isCollected ? 'bg-arcade-purple/20' : 'bg-arcade-darker'}`}
+                      >
+                        <div className="flex-none">
+                          {isCollected ? (
+                            <Check size={16} className="text-arcade-green" />
+                          ) : (
+                            <XCircle size={16} className="text-arcade-orange/50" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-xs font-pixel ${isCollected ? 'text-white' : 'text-gray-400'}`}>
+                            {skill.name}
+                          </p>
+                        </div>
+                        {isCollected && (
+                          <Badge 
+                            className="text-xxs bg-arcade-purple/50 hover:bg-arcade-purple" 
+                            variant="default"
+                          >
+                            CAUGHT
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 italic">No skills available</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
       
       <div className="flex flex-col sm:flex-row justify-between w-full px-4 mb-3 gap-2">
         <div className="text-arcade-green font-pixel text-xs sm:text-sm">
