@@ -59,8 +59,8 @@ const SkillToken: React.FC<SkillTokenProps> = ({ name, icon, description, x, y, 
       }}
       onClick={handleCollect}
     >
-      {icon}
       <span className="sr-only">{name}</span>
+      {icon}
     </div>
   );
 };

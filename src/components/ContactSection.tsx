@@ -21,26 +21,52 @@ const ContactSection: React.FC = () => {
     });
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    playSound('success');
     
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setFormState({
-        name: '',
-        email: '',
-        message: ''
+    try {
+      // Use EmailJS to send email
+      const response = await fetch('https://formsubmit.co/ajax/jaswanthch.me@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formState.name,
+          email: formState.email,
+          message: formState.message,
+          _subject: `Portfolio Contact from ${formState.name}`
+        })
       });
       
+      if (response.ok) {
+        playSound('success');
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for your message. I'll get back to you soon!",
+          duration: 5000,
+        });
+        
+        setFormState({
+          name: '',
+          email: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
       toast({
-        title: "Message Sent!",
-        description: "Thank you for your message. I'll get back to you soon!",
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
         duration: 5000,
       });
-    }, 1500);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -112,25 +138,31 @@ const ContactSection: React.FC = () => {
             <h3 className="text-arcade-blue font-pixel text-sm mb-3">CONNECT</h3>
             <div className="space-y-3">
               <a 
-                href="#" 
+                href="https://github.com/jaswanthch" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-arcade-blue transition-colors"
               >
                 <Github size={18} className="mr-2" />
-                github.com/yourusername
+                github.com/jaswanthch
               </a>
               <a 
-                href="#" 
+                href="https://www.linkedin.com/in/jaswanthch/" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-arcade-purple transition-colors"
               >
                 <Linkedin size={18} className="mr-2" />
-                linkedin.com/in/yourusername
+                linkedin.com/in/jaswanthch
               </a>
               <a 
-                href="#" 
+                href="https://x.com/ChJaswanth807" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-arcade-orange transition-colors"
               >
                 <Twitter size={18} className="mr-2" />
-                twitter.com/yourusername
+                x.com/ChJaswanth807
               </a>
             </div>
           </div>
@@ -138,7 +170,7 @@ const ContactSection: React.FC = () => {
           <div className="bg-arcade-dark p-4 rounded-md border border-arcade-purple">
             <h3 className="text-arcade-green font-pixel text-sm mb-3">LOCATION</h3>
             <p className="text-gray-300 mb-2">Currently based in:</p>
-            <p className="text-white">San Francisco, CA</p>
+            <p className="text-white">Thunder Bay, Ontario</p>
             <p className="text-gray-400 mt-4">Available for remote work worldwide</p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import SkillToken from './SkillToken';
-import { Code, Database, Globe, Server, Terminal, Zap, Layout, FileCode, Gamepad2 } from 'lucide-react';
+import { Code, Database, Globe, Server, Terminal, Zap, Layout, FileCode } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const SkillsSection: React.FC = () => {
@@ -118,23 +118,22 @@ const SkillsSection: React.FC = () => {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {skills.filter(skill => collectedSkills.includes(skill.name)).map((skill) => (
           <Sheet key={skill.name}>
             <SheetTrigger asChild>
               <div 
-                className="bg-arcade-dark p-4 rounded-lg border border-arcade-purple cursor-pointer hover:border-arcade-green transition-colors flex items-center gap-3"
+                className="bg-arcade-dark p-3 rounded-lg border border-arcade-purple cursor-pointer hover:border-arcade-green transition-colors flex items-center gap-2"
                 onClick={() => handleSkillSelect(skill)}
               >
                 <div 
-                  className="w-10 h-10 rounded-full flex items-center justify-center" 
+                  className="w-8 h-8 rounded-full flex items-center justify-center" 
                   style={{ background: skill.color || 'rgba(155, 135, 245, 0.8)' }}
                 >
                   {skill.icon}
                 </div>
                 <div>
-                  <h3 className="text-white font-pixel">{skill.name}</h3>
-                  <p className="text-gray-400 text-sm">{skill.description.substring(0, 60)}...</p>
+                  <h3 className="text-white font-pixel text-sm">{skill.name}</h3>
                 </div>
               </div>
             </SheetTrigger>
@@ -189,15 +188,6 @@ const SkillsSection: React.FC = () => {
           </p>
         </div>
       )}
-      
-      <div className="flex justify-center mt-6">
-        <div className="flex items-center gap-2 px-3 py-2 bg-arcade-dark rounded-lg border border-arcade-purple">
-          <Gamepad2 size={18} className="text-arcade-purple" />
-          <span className="text-gray-300 text-sm">
-            Try the Snake Game to collect all skills
-          </span>
-        </div>
-      </div>
     </div>
   );
 };
