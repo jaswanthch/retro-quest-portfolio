@@ -23,9 +23,11 @@ const AboutSection: React.FC = () => {
             and continuing to expand my development toolkit.
           </p>
           
-          <ArcadeButton color="green" className="inline-block">
-            <Download size={16} className="mr-2" /> Download Resume
-          </ArcadeButton>
+          <a href="/resume.pdf" download>
+            <ArcadeButton color="green" className="inline-block">
+              <Download size={16} className="mr-2" /> Download Resume
+            </ArcadeButton>
+          </a>
         </div>
         
         <div className="flex-1">

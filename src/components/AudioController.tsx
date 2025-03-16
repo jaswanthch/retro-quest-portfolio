@@ -2,14 +2,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
-// Sound URLs
+// Sound URLs from public folder
 const AUDIO_URLS = {
-  bgm: "https://assets.mixkit.co/music/download/mixkit-game-level-music-689.mp3",
-  click: "https://assets.mixkit.co/sfx/download/mixkit-arcade-game-jump-coin-216.wav",
-  hover: "https://assets.mixkit.co/sfx/download/mixkit-quick-jump-arcade-game-239.wav",
-  collect: "https://assets.mixkit.co/sfx/download/mixkit-arcade-mechanical-bling-217.wav",
-  success: "https://assets.mixkit.co/sfx/download/mixkit-unlock-game-notification-253.wav",
-  error: "https://assets.mixkit.co/sfx/download/mixkit-falling-game-over-1942.wav"
+  bgm: "/audio/bgm.mp3",
+  click: "/audio/click.wav",
+  hover: "/audio/hover.wav",
+  collect: "/audio/collect.wav",
+  success: "/audio/success.wav",
+  error: "/audio/error.wav"
 };
 
 const AudioController = () => {
