@@ -1,3 +1,7 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +17,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 263 85% 60%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -35,19 +39,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -96,6 +93,80 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-arcade-dark text-foreground;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-pixel tracking-tight;
+  }
+}
+
+@layer components {
+  .crt::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+  }
+
+  .pixel-corners {
+    clip-path: polygon(
+      0px 4px,
+      4px 0px,
+      calc(100% - 4px) 0px,
+      100% 4px,
+      100% calc(100% - 4px),
+      calc(100% - 4px) 100%,
+      4px 100%,
+      0px calc(100% - 4px)
+    );
+  }
+
+  .arcade-btn {
+    @apply relative flex items-center justify-center font-pixel text-sm px-4 py-3 rounded-md transition-all duration-200 shadow-lg hover:shadow-xl;
+  }
+  
+  .arcade-btn::before {
+    content: "";
+    @apply absolute inset-0 rounded-md opacity-0 transition-opacity;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  }
+  
+  .arcade-btn:hover::before {
+    @apply opacity-100;
+  }
+  
+  .arcade-btn:active {
+    @apply transform translate-y-1 shadow-md;
+  }
+
+  .skill-token {
+    @apply relative w-12 h-12 rounded-full flex items-center justify-center animate-float cursor-pointer;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.8) 0%, rgba(139, 92, 246, 0.6) 70%, rgba(139, 92, 246, 0) 100%);
+  }
+
+  .skill-token::before {
+    content: "";
+    @apply absolute inset-0 rounded-full animate-pulse-glow;
+  }
+
+  .scanlines {
+    @apply pointer-events-none fixed inset-0 z-50 opacity-10;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
   }
 }
