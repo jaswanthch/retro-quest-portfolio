@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
@@ -418,6 +419,7 @@ const SnakeGame: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
         
         <div className="flex flex-col lg:flex-row gap-6 relative">
           {/* Game Screen with CRT Effect */}
@@ -600,7 +602,7 @@ const SnakeGame: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-arcade-green font-pixel text-xl">
               You joined the ranks!
-            </DialogTitle>
+            </AlertDialogTitle>
           </AlertDialogHeader>
           <p className="text-white py-4">
             Congratulations! You've collected all the skills. What would you like to do next?
