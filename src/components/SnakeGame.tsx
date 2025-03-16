@@ -7,6 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogFooter, 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Position = {
   x: number;
@@ -97,6 +98,8 @@ const SnakeGame: React.FC = () => {
   const gameLoopRef = useRef<number | null>(null);
   const directionQueueRef = useRef<string[]>([]);
   const gameContainerRef = useRef<HTMLDivElement>(null);
+  const gameCanvasWrapperRef = useRef<HTMLDivElement>(null);
+  const skillsPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedSkills = JSON.parse(localStorage.getItem('collectedSkills') || '[]');
@@ -125,6 +128,25 @@ const SnakeGame: React.FC = () => {
     if (popupSetting !== null) {
       setShowPopups(popupSetting === 'true');
     }
+  }, []);
+
+  useEffect(() => {
+    const matchHeight = () => {
+      const canvasWrapper = gameCanvasWrapperRef.current;
+      const skillsPanel = skillsPanelRef.current;
+      
+      if (canvasWrapper && skillsPanel) {
+        const canvasHeight = canvasWrapper.offsetHeight;
+        skillsPanel.style.height = `${canvasHeight}px`;
+      }
+    };
+    
+    matchHeight();
+    window.addEventListener('resize', matchHeight);
+    
+    return () => {
+      window.removeEventListener('resize', matchHeight);
+    };
   }, []);
 
   useEffect(() => {
@@ -437,7 +459,7 @@ const SnakeGame: React.FC = () => {
         </div>
         
         <div className="flex flex-col lg:flex-row gap-6 relative">
-          <div className="flex-1 relative">
+          <div className="flex-1 relative" ref={gameCanvasWrapperRef}>
             <div className="absolute -inset-1 bg-gradient-to-br from-arcade-pink/20 via-arcade-purple/20 to-arcade-blue/20 blur"></div>
             <div className="bg-black rounded-sm relative overflow-hidden crt flex items-center justify-center min-h-[400px]">
               <canvas 
@@ -472,63 +494,65 @@ const SnakeGame: React.FC = () => {
             </div>
           </div>
           
-          <div className="w-full lg:w-[280px] relative">
+          <div className="w-full lg:w-[280px] relative" ref={skillsPanelRef}>
             <div className="absolute -inset-1 bg-gradient-to-br from-arcade-green/20 via-arcade-blue/20 to-arcade-orange/20 blur"></div>
-            <Card className="bg-arcade-dark border-2 border-arcade-purple text-white h-full relative overflow-hidden">
-              <CardHeader className="px-4 py-3 bg-arcade-darker border-b border-arcade-purple/30">
+            <Card className="bg-arcade-dark border-2 border-arcade-purple text-white h-full relative overflow-hidden flex flex-col">
+              <CardHeader className="px-4 py-3 bg-arcade-darker border-b border-arcade-purple/30 flex-shrink-0">
                 <CardTitle className="text-arcade-purple font-pixel text-base flex items-center gap-2">
                   <Joystick size={18} className="text-arcade-purple" />
                   COLLECTED SKILLS
                 </CardTitle>
               </CardHeader>
               <Separator className="bg-arcade-purple/30" />
-              <CardContent className="p-4 overflow-y-auto max-h-[400px] custom-scrollbar">
-                {skills.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-3">
-                    {skills.map((skill) => {
-                      const isCollected = capturedSkills.includes(skill.name);
-                      return (
-                        <div 
-                          key={skill.name} 
-                          className={`flex items-center gap-3 p-2 rounded-md ${isCollected ? 'bg-arcade-purple/20' : 'bg-arcade-darker'} border ${isCollected ? 'border-arcade-purple/30' : 'border-gray-700'}`}
-                        >
-                          <div className="flex-none w-6 h-6 flex items-center justify-center">
-                            {isCollected ? (
-                              <div className="w-5 h-5 rounded-full bg-arcade-green/30 flex items-center justify-center">
-                                <Check size={14} className="text-arcade-green" />
-                              </div>
-                            ) : (
-                              <div className="w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center">
-                                <XCircle size={14} className="text-gray-600" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <p className={`text-sm font-pixel ${isCollected ? 'text-white' : 'text-gray-500'}`}>
-                              {skill.name}
-                            </p>
-                            {isCollected && (
-                              <p className="text-xs text-gray-400 mt-1 leading-tight">
-                                {skill.description}
+              <ScrollArea className="flex-grow">
+                <CardContent className="p-4">
+                  {skills.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3">
+                      {skills.map((skill) => {
+                        const isCollected = capturedSkills.includes(skill.name);
+                        return (
+                          <div 
+                            key={skill.name} 
+                            className={`flex items-center gap-3 p-2 rounded-md ${isCollected ? 'bg-arcade-purple/20' : 'bg-arcade-darker'} border ${isCollected ? 'border-arcade-purple/30' : 'border-gray-700'}`}
+                          >
+                            <div className="flex-none w-6 h-6 flex items-center justify-center">
+                              {isCollected ? (
+                                <div className="w-5 h-5 rounded-full bg-arcade-green/30 flex items-center justify-center">
+                                  <Check size={14} className="text-arcade-green" />
+                                </div>
+                              ) : (
+                                <div className="w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center">
+                                  <XCircle size={14} className="text-gray-600" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className={`text-sm font-pixel ${isCollected ? 'text-white' : 'text-gray-500'}`}>
+                                {skill.name}
                               </p>
+                              {isCollected && (
+                                <p className="text-xs text-gray-400 mt-1 leading-tight">
+                                  {skill.description}
+                                </p>
+                              )}
+                            </div>
+                            {isCollected && (
+                              <Badge 
+                                className="text-xxs bg-arcade-green/70 hover:bg-arcade-green" 
+                                variant="default"
+                              >
+                                CAUGHT
+                              </Badge>
                             )}
                           </div>
-                          {isCollected && (
-                            <Badge 
-                              className="text-xxs bg-arcade-green/70 hover:bg-arcade-green" 
-                              variant="default"
-                            >
-                              CAUGHT
-                            </Badge>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-400 italic">No skills available</p>
-                )}
-              </CardContent>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400 italic">No skills available</p>
+                  )}
+                </CardContent>
+              </ScrollArea>
             </Card>
           </div>
         </div>
@@ -641,3 +665,4 @@ const SnakeGame: React.FC = () => {
 };
 
 export default SnakeGame;
+
