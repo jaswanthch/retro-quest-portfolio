@@ -77,6 +77,12 @@ const generateFood = (isSkill: boolean, capturedSkills: string[]): SkillFood => 
 
 const SnakeGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gameCanvasWrapperRef = useRef<HTMLDivElement>(null);
+  const skillsPanelRef = useRef<HTMLDivElement>(null);
+  const gameContainerRef = useRef<HTMLDivElement>(null);
+  const directionQueueRef = useRef<string[]>([]);
+  const gameLoopRef = useRef<number | null>(null);
+  
   const [snake, setSnake] = useState<Position[]>([
     { x: 10, y: 10 },
     { x: 9, y: 10 },
@@ -394,85 +400,77 @@ const SnakeGame: React.FC = () => {
     };
   }, [direction, gameOver, gameStarted]);
   
-  useEffect(() => {
-    const handleTouchStart = (e: React.TouchEvent) => {
-      if (gameOver || paused || !gameStarted) return;
-      
-      const touch = e.touches[0];
-      touchStartRef.current = {
-        x: touch.clientX,
-        y: touch.clientY
-      };
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (gameOver || paused || !gameStarted) return;
+    
+    const touch = e.touches[0];
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY
     };
+  };
 
-    const handleTouchEnd = (e: React.TouchEvent) => {
-      if (gameOver || paused || !gameStarted || !touchStartRef.current) return;
-      
-      const touch = e.changedTouches[0];
-      const endX = touch.clientX;
-      const endY = touch.clientY;
-      
-      const dx = endX - touchStartRef.current.x;
-      const dy = endY - touchStartRef.current.y;
-      
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 30 && direction !== 'left') {
-          directionQueueRef.current.push('right');
-        } else if (dx < -30 && direction !== 'right') {
-          directionQueueRef.current.push('left');
-        }
-      } else {
-        if (dy > 30 && direction !== 'up') {
-          directionQueueRef.current.push('down');
-        } else if (dy < -30 && direction !== 'down') {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (gameOver || paused || !gameStarted || !touchStartRef.current) return;
+    
+    const touch = e.changedTouches[0];
+    const endX = touch.clientX;
+    const endY = touch.clientY;
+    
+    const dx = endX - touchStartRef.current.x;
+    const dy = endY - touchStartRef.current.y;
+    
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 30 && direction !== 'left') {
+        directionQueueRef.current.push('right');
+      } else if (dx < -30 && direction !== 'right') {
+        directionQueueRef.current.push('left');
+      }
+    } else {
+      if (dy > 30 && direction !== 'up') {
+        directionQueueRef.current.push('down');
+      } else if (dy < -30 && direction !== 'down') {
+        directionQueueRef.current.push('up');
+      }
+    }
+    
+    touchStartRef.current = null;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDirectionButtonClick = (newDirection: string) => {
+    if (gameOver || paused || !gameStarted) return;
+    
+    switch (newDirection) {
+      case 'up':
+        if (direction !== 'down') {
           directionQueueRef.current.push('up');
         }
-      }
-      
-      touchStartRef.current = null;
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-      e.preventDefault();
-    };
-
-    const handleDirectionButtonClick = (newDirection: string) => {
-      if (gameOver || paused || !gameStarted) return;
-      
-      switch (newDirection) {
-        case 'up':
-          if (direction !== 'down') {
-            directionQueueRef.current.push('up');
-          }
-          break;
-        case 'down':
-          if (direction !== 'up') {
-            directionQueueRef.current.push('down');
-          }
-          break;
-        case 'left':
-          if (direction !== 'right') {
-            directionQueueRef.current.push('left');
-          }
-          break;
-        case 'right':
-          if (direction !== 'left') {
-            directionQueueRef.current.push('right');
-          }
-          break;
-        default:
-          break;
-      }
-      
-      playSound('click');
-    };
-
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, [direction, gameOver, gameStarted]);
+        break;
+      case 'down':
+        if (direction !== 'up') {
+          directionQueueRef.current.push('down');
+        }
+        break;
+      case 'left':
+        if (direction !== 'right') {
+          directionQueueRef.current.push('left');
+        }
+        break;
+      case 'right':
+        if (direction !== 'left') {
+          directionQueueRef.current.push('right');
+        }
+        break;
+      default:
+        break;
+    }
+    
+    playSound('click');
+  };
 
   useEffect(() => {
     if (!gameOver && !paused && gameStarted) {
