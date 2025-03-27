@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ArcadeControls from '@/components/ArcadeControls';
 import ArcadeButton from '@/components/ArcadeButton';
-import AvatarCharacter from '@/components/AvatarCharacter';
 import AboutSection from '@/components/AboutSection';
 import SkillsSection from '@/components/SkillsSection';
 import ProjectsSection from '@/components/ProjectsSection';
@@ -76,12 +75,6 @@ const Index = () => {
     window.history.pushState({}, '', url);
   };
   
-  const handleAvatarGuide = (section: string) => {
-    if (section) {
-      handleControlClick(section);
-    }
-  };
-  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-arcade-darker flex-col w-full">
@@ -131,8 +124,6 @@ const Index = () => {
           <div className="grid grid-cols-1 gap-4 md:gap-6 mb-4 md:mb-6">
             <div className="bg-arcade-darker p-1 rounded-lg border-2 md:border-4 border-arcade-purple relative overflow-hidden crt">
               <div className="bg-arcade-dark p-3 md:p-6 min-h-[300px] md:min-h-[500px] relative">
-                <AvatarCharacter onGuide={handleAvatarGuide} />
-                
                 <div className="mb-3 md:mb-6 flex justify-between items-center">
                   <h2 className="text-lg md:text-xl font-pixel text-arcade-purple">
                     {activeSection.toUpperCase()} MISSION
