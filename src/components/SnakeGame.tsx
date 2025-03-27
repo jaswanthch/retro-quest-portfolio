@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, TouchEvent } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useArcadeSound } from './AudioController';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pause, Play, RefreshCw, ArrowRight, Check, XCircle, Joystick, Speaker, GamepadIcon } from 'lucide-react';
+import { Pause, Play, RefreshCw, ArrowRight, Check, XCircle, Joystick, Speaker, GamepadIcon, ArrowUp, ArrowDown, ArrowLeft } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ArcadeButton from './ArcadeButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type Position = {
   x: number;
@@ -96,12 +97,8 @@ const SnakeGame: React.FC = () => {
   const [itemsCollected, setItemsCollected] = useState<number>(0);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const { playSound, setIsGameActive } = useArcadeSound();
-  
-  const gameLoopRef = useRef<number | null>(null);
-  const directionQueueRef = useRef<string[]>([]);
-  const gameContainerRef = useRef<HTMLDivElement>(null);
-  const gameCanvasWrapperRef = useRef<HTMLDivElement>(null);
-  const skillsPanelRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const touchStartRef = useRef<{x: number, y: number} | null>(null);
 
   useEffect(() => {
     const savedSkills = JSON.parse(localStorage.getItem('collectedSkills') || '[]');
@@ -152,16 +149,19 @@ const SnakeGame: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const preventArrowScroll = (e: KeyboardEvent) => {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
-        e.preventDefault();
-      }
+    const preventDefaultTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
     };
 
-    window.addEventListener('keydown', preventArrowScroll);
+    const gameContainer = gameContainerRef.current;
+    if (gameContainer) {
+      gameContainer.addEventListener('touchmove', preventDefaultTouchMove as any, { passive: false });
+    }
 
     return () => {
-      window.removeEventListener('keydown', preventArrowScroll);
+      if (gameContainer) {
+        gameContainer.removeEventListener('touchmove', preventDefaultTouchMove as any);
+      }
     };
   }, []);
 
@@ -395,6 +395,86 @@ const SnakeGame: React.FC = () => {
   }, [direction, gameOver, gameStarted]);
   
   useEffect(() => {
+    const handleTouchStart = (e: React.TouchEvent) => {
+      if (gameOver || paused || !gameStarted) return;
+      
+      const touch = e.touches[0];
+      touchStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY
+      };
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+      if (gameOver || paused || !gameStarted || !touchStartRef.current) return;
+      
+      const touch = e.changedTouches[0];
+      const endX = touch.clientX;
+      const endY = touch.clientY;
+      
+      const dx = endX - touchStartRef.current.x;
+      const dy = endY - touchStartRef.current.y;
+      
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 30 && direction !== 'left') {
+          directionQueueRef.current.push('right');
+        } else if (dx < -30 && direction !== 'right') {
+          directionQueueRef.current.push('left');
+        }
+      } else {
+        if (dy > 30 && direction !== 'up') {
+          directionQueueRef.current.push('down');
+        } else if (dy < -30 && direction !== 'down') {
+          directionQueueRef.current.push('up');
+        }
+      }
+      
+      touchStartRef.current = null;
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+      e.preventDefault();
+    };
+
+    const handleDirectionButtonClick = (newDirection: string) => {
+      if (gameOver || paused || !gameStarted) return;
+      
+      switch (newDirection) {
+        case 'up':
+          if (direction !== 'down') {
+            directionQueueRef.current.push('up');
+          }
+          break;
+        case 'down':
+          if (direction !== 'up') {
+            directionQueueRef.current.push('down');
+          }
+          break;
+        case 'left':
+          if (direction !== 'right') {
+            directionQueueRef.current.push('left');
+          }
+          break;
+        case 'right':
+          if (direction !== 'left') {
+            directionQueueRef.current.push('right');
+          }
+          break;
+        default:
+          break;
+      }
+      
+      playSound('click');
+    };
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [direction, gameOver, gameStarted]);
+
+  useEffect(() => {
     if (!gameOver && !paused && gameStarted) {
       gameLoopRef.current = window.setTimeout(moveSnake, speed);
     }
@@ -458,7 +538,7 @@ const SnakeGame: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto">
+    <div className="relative w-full max-w-5xl mx-auto" ref={gameContainerRef}>
       <div className="bg-[#221F26] rounded-t-3xl shadow-2xl border-b-0 pt-8 px-8 pb-0 border-4 border-[#403E43] relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-8 bg-[#0F1218] flex justify-between items-center px-6 border-b-4 border-[#403E43]">
           <div className="flex items-center gap-1">
@@ -489,7 +569,11 @@ const SnakeGame: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-6 relative">
           <div className="flex-1 relative" ref={gameCanvasWrapperRef}>
             <div className="absolute -inset-1 bg-gradient-to-br from-arcade-pink/20 via-arcade-purple/20 to-arcade-blue/20 blur"></div>
-            <div className="bg-black rounded-sm relative overflow-hidden crt flex items-center justify-center min-h-[400px]">
+            <div className="bg-black rounded-sm relative overflow-hidden crt flex items-center justify-center min-h-[400px]"
+                 onTouchStart={handleTouchStart}
+                 onTouchEnd={handleTouchEnd}
+                 onTouchMove={handleTouchMove}
+            >
               <canvas 
                 ref={canvasRef} 
                 width={GRID_SIZE * CELL_SIZE} 
@@ -539,7 +623,7 @@ const SnakeGame: React.FC = () => {
             
             <div className="mt-4 flex flex-col sm:flex-row justify-between gap-2">
               <div className="text-arcade-green font-pixel text-xs">
-                Arrow keys to control
+                {isMobile ? "Swipe to control" : "Arrow keys to control"}
               </div>
               <div className="text-arcade-orange font-pixel text-xs">
                 Every {ITEMS_BEFORE_SKILL} items = 1 skill
@@ -609,6 +693,53 @@ const SnakeGame: React.FC = () => {
             </Card>
           </div>
         </div>
+        
+        {isMobile && gameStarted && !gameOver && (
+          <div className="mt-4 bg-arcade-darker p-4 rounded-lg border border-arcade-purple">
+            <div className="grid grid-cols-3 gap-2 max-w-[240px] mx-auto">
+              <div className="col-start-2">
+                <ArcadeButton
+                  onClick={() => handleDirectionButtonClick('up')}
+                  color="blue"
+                  className="w-full h-14 flex items-center justify-center"
+                  aria-label="Move Up"
+                >
+                  <ArrowUp size={24} />
+                </ArcadeButton>
+              </div>
+              <div className="col-start-1 row-start-2">
+                <ArcadeButton
+                  onClick={() => handleDirectionButtonClick('left')}
+                  color="blue"
+                  className="w-full h-14 flex items-center justify-center"
+                  aria-label="Move Left"
+                >
+                  <ArrowLeft size={24} />
+                </ArcadeButton>
+              </div>
+              <div className="col-start-3 row-start-2">
+                <ArcadeButton
+                  onClick={() => handleDirectionButtonClick('right')}
+                  color="blue"
+                  className="w-full h-14 flex items-center justify-center"
+                  aria-label="Move Right"
+                >
+                  <ArrowRight size={24} />
+                </ArcadeButton>
+              </div>
+              <div className="col-start-2 row-start-3">
+                <ArcadeButton
+                  onClick={() => handleDirectionButtonClick('down')}
+                  color="blue"
+                  className="w-full h-14 flex items-center justify-center"
+                  aria-label="Move Down"
+                >
+                  <ArrowDown size={24} />
+                </ArcadeButton>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="bg-[#1A1F2C] mt-6 p-5 border-t-4 border-[#403E43] rounded-b-lg shadow-inner flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
