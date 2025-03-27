@@ -66,11 +66,6 @@ const AvatarCharacter: React.FC<AvatarCharacterProps> = ({ onGuide }) => {
         className="w-16 h-16 relative cursor-pointer"
         onClick={handleClick}
       >
-        {/* Placeholder for pixel art character - replace with actual sprite */}
-        <div className="w-full h-full bg-arcade-purple rounded-full flex items-center justify-center text-white font-pixel text-xs">
-          DEV
-        </div>
-        
         {showDialog && (
           <div className="absolute top-0 left-full ml-4 w-48 p-3 bg-white text-black rounded font-pixel text-xs animate-fade-in">
             <div className="absolute left-0 top-1/2 -ml-2 w-0 h-0 border-t-4 border-r-4 border-b-4 border-transparent border-r-white"></div>
