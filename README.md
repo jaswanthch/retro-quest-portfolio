@@ -1,69 +1,119 @@
-# Welcome to your Lovable project
 
-## Project info
+# 🎮 Jaswanth's Quest - Interactive Portfolio
 
-**URL**: https://lovable.dev/projects/b3aa1187-d18f-4853-a8b1-1d8fb16d69b1
+An arcade-style interactive portfolio website showcasing my skills, projects, and contact information in a unique and engaging way.
 
-## How can I edit this code?
+![Jaswanth's Quest](public/og-image.png)
 
-There are several ways of editing your application.
+## 🚀 Live Demo
 
-**Use Lovable**
+Visit the live portfolio: [https://retro-quest-portfolio.lovable.app/](https://retro-quest-portfolio.lovable.app/)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b3aa1187-d18f-4853-a8b1-1d8fb16d69b1) and start prompting.
+## ✨ Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Interactive Snake Game**: Collect skill tokens while playing
+- **Arcade-Style UI**: Retro gaming aesthetics with modern web capabilities
+- **Responsive Design**: Works on both desktop and mobile devices
+- **Sound Effects**: Interactive audio feedback
+- **Interactive Components**: Engaging user interface elements
 
-**Use your preferred IDE**
+## 🛠️ Technologies Used
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+The portfolio is built with modern web technologies:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Frontend Framework
+- **React**: Component-based UI development
+- **TypeScript**: Type-safe JavaScript
+- **Vite**: Fast development server and build tool
 
-Follow these steps:
+### Styling
+- **Tailwind CSS**: Utility-first CSS framework
+- **Shadcn UI**: High-quality UI components
+- **Custom Animations**: Pixel art effects and transitions
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### State Management & Effects
+- **React Hooks**: Managing component state and side effects
+- **Local Storage**: Persisting game state between sessions
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Audio
+- **Custom Audio Controller**: Background music and sound effects
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Additional Features
+- **Form Handling**: Contact form with validation
+- **Responsive Design**: Mobile-friendly interface
+- **Custom Game Logic**: Snake game implementation
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## 💻 Skills Showcase
+
+### JavaScript & TypeScript
+- Strong proficiency in JavaScript and TypeScript
+- Modern ES6+ features and syntax
+- Type-safe code development
+
+### React & Next.js
+- Component architecture
+- React hooks and functional components
+- Server-side rendering with Next.js
+
+### WordPress & PHP
+- Custom theme and plugin development
+- PHP scripting for server-side functionality
+- WordPress site optimization
+
+### Database Technologies
+- Experience with MySQL for relational databases
+- MongoDB for NoSQL data storage
+- Data modeling and optimization
+
+### UI/UX Development
+- Responsive design implementation
+- Interactive UI components
+- Accessibility considerations
+
+### Additional Skills
+- RESTful API development
+- Version control with Git
+- Performance optimization
+- Cross-browser compatibility
+
+## 🎮 How to Use
+
+1. Navigate through different sections using the arcade controls at the bottom
+2. Play the Snake Game to collect skill tokens
+3. Explore projects in the Projects section
+4. Contact me through the Contact section
+
+## 📱 Mobile Support
+
+The portfolio is fully responsive and includes touch controls for the Snake Game on mobile devices.
+
+## 🔧 Development
+
+### Prerequisites
+- Node.js & npm 
+
+### Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+
+# Navigate to project directory
+cd retro-quest-portfolio
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 📞 Contact
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Feel free to reach out:
+- **GitHub**: [github.com/jaswanthch](https://github.com/jaswanthch)
+- **LinkedIn**: [linkedin.com/in/jaswanthch](https://linkedin.com/in/jaswanthch)
+- **Twitter**: [x.com/ChJaswanth807](https://x.com/ChJaswanth807)
 
-**Use GitHub Codespaces**
+## 📄 License
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/b3aa1187-d18f-4853-a8b1-1d8fb16d69b1) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+This project is licensed under the MIT License - see the LICENSE file for details.
